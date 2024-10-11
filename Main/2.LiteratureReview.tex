@@ -1,0 +1,275 @@
+Both power analysis and meta-analysis of primary studies with clustered data require accurate estimation of the ICC. One potential method for obtaining an accurate ICC estimate consists of pooling reported values from related prior studies. However, there is a lack of consensus about how best to pool ICCs. In the following few sections, we review the research on methodological considerations when determining the best method for pooling ICC estimates. We first provide a very brief overview of clustered data analysis, which serves as the framework for understanding ICCs and provides a formal definition of the ICC. 
+Next we explain the importance of good ICC estimates and methods for calculating them when conducting power analyses and meta-analyses. We describe what is known about the sampling distribution of ICC estimates, including the associated variance formulations. Last, we summarize the meta-analytic methods relevant to pooling ICC estimates. 
+
+
+\subsubsection{Analyzing Clustered Data}
+While several analytic methods have been developed to handle clustered data \cite{donner1980, LIANGKUNG-YEE1986Ldau, mcneish2019}, multilevel modeling (MLM; also referred to as mixed-effects, random effects, hierarchical linear, and random-coefficients modeling; \citeauthorNP{raudenbushHierarchicalLinearModels2002}, \citeyearNP{raudenbushHierarchicalLinearModels2002}) is the most common modeling technique used in applied social science research. When the functional form of a MLM model is correctly specified for the data structure, MLM has been shown to result in more precise standard errors \cite{mcneish2019}. MLM models cluster dependence by portioning the overall variance in an outcome into within-cluster and between-cluster components. A common applied data scenario entails lower-order units (like students) that are clustered within higher-order units (like schools). In this study, we are focusing on two-level data with individuals clustered within higher-level units. Future research can explore scenarios with additional levels of and further complications in data's clustering. 
+
+In the MLM framework, both the between- and the within-cluster variation must be specified in the model \cite{raudenbushHierarchicalLinearModels2002}. For example, in a data set with students nested within schools, the nested structure can be modeled using a two-level random effects model as follows:
+\begin{equation}\label{twolevel}
+    \begin{split}
+    Level \quad 1: Y_{ij} &= \beta_{0j} + e_{ij} \\
+    Level \quad 2: \beta_{0j} &= \gamma_{00} + u_{0j}
+    \end{split} 
+\end{equation}
+    
+\noindent where $Y_{ij}$ is the outcome score for student $i$ in school $j$, $\gamma_{00}$ is the grand mean of the outcome $Y_{ij}$, $u_{0j}$ is the random effect for school $j$, and $e_{ij}$ is the level 1 residual that varies around school $j$'s mean, $\beta_{0j}$. Both residual terms,  $u_{0j}$ and $e_{ij}$, are typically assumed to follow independent normal distributions, each with a mean of zero and variances of $\sigma^2_u$ and $\sigma_e^2$, respectively. In the above specification, we assume errors from different clusters are independent, while errors within a cluster are modeled as correlated. The correlation is commonly assumed to be the same for each pair of outcomes within and across clusters. More complex specifications are available, but for the purpose of this study, we will maintain these assumptions.
+
+
+ 
+\subsection{Intraclass Correlation Coefficient}
+In the MLM framework, the intraclass correlation coefficient (ICC) is used to summarize the degree of dependence in the data by capturing the proportion of total variance in the outcome that is between clusters. For MLMs, the variance within clusters is typically assumed to be the same in each cluster. Formally, the equation for the ICC, denoted as $\rho$, from a two-level unconditional model, a model with no predictors at either level as depicted in Equation \ref{twolevel}, is as follows:
+            
+\begin{equation}\label{ICC_algebra}
+%    \begin{split}
+%    \rho &= \frac{cov(Y_{i_1j}, Y_{i_2j})}{var(Y_{ij})} \\
+%              &= \frac{cov(\mu + u_{0j} + e_{i_1j}, \mu + u_{0j} + e_{i_2j})}{var(u_{0j})+var(e_{ij})} \\
+%              &= \frac{cov(u_{0j}, u_{0j})}{var(u_{0j})+var(e_{ij})} \\
+              %&=
+              \rho=\frac{\sigma^2_u}{\sigma^2_u+\sigma^2_e}, 
+%    \end{split}              
+\end{equation}
+            
+\noindent where $\rho$ equals the level-2 variance divided by the level-2 variance plus the level-1 variance, or total variance. The ICC is non-negative, $\rho \geq 0$, because variance components are non-negative. Higher ICC values imply that there is a stronger clustering effect, and an ICC value near zero implies that there is close to no clustering dependence. 
+
+The ICC is typically estimated using an unconditional model as shown in Equation \ref{twolevel} \cite{hedgesEffectSizesClusterRandomized2007, hedges2013}.  That being said, however, it is possible to estimate an adjusted ICC that incorporates the change in the variance explained by including covariates in the MLM. However, in this study, we will focus on the unconditional ICC because that is what is typically used as the ICC value in meta-analysis and a priori power analyses for clustered data \cite{taylor2021}. This offers a starting point for this line of research. Future research can begin to consider how best to synthesize adjusted ICCs. 
+
+The magnitude of an ICC estimate is dependent on the study's experimental design, outcome measure, and population. Despite the full range of ICC values being between 0 and 1, ICC values estimated from real data will have a restricted range depending on the context. For example, the ICC estimates reported by \citeA{hedgesIntraclassCorrelationValues2007a} range from 0.045 to 0.271 in educational research settings. Yet, ICC values as low as .05 and .10 can result in severe type-I error biases if clustering is ignored in the associated analyses \cite{hox2001, muthen1995}. 
+
+
+
+\subsection{Review of Past Methods to Handle Missing ICC Values}
+In the following section, we review the methods that have been proposed when an ICC estimate is needed for a prospective power analysis or a meta-analysis of clustered data. These methods are not evaluated in this study due to the limitations that we will present in this section. However, these methods help inform some of the problems that should be considered when tackling this methodological dilemma. 
+
+\subsubsection{Single-Value Imputation Methods}
+As stated above, an inaccurate ICC value can have negative consequences on the result of either a power analysis or a meta-analysis of CRTs. One possible method used to obtain an ICC in the case of a prospective power analysis is to run a pilot study \cite{rhoads}. However, a pilot study will result in an imprecise level 1 and level 2 variance estimates and thus also in the resulting ICC estimate based on the small pilot study if the sample size is too small. In addition, funding and time constraints further limit the practicality of running a pilot study. 
+
+One option is to impute an ICC value from a prior study of a similar design. In educational and medical research, several investigators have compiled typical design parameters, including sample sizes and the ICC values, for multilevel experimental designs from data collected at the cluster unit or national level for single-value imputation purposes \cite{bloomUsingCovariatesImprove2007, hedbergReferenceValuesWithinDistrict2014,hedgesIntraclassCorrelationValues2007a}. The authors found that ICCs varied depending on a number of design characteristics including, for example, the outcome measure, age, and socioeconomic status. When in need of an ICC for a power analysis or to correct effect sizes, one suggestion is to impute  an observed ICC estimate based on from multiple studies with similar design parameters. 
+
+When researchers are unable to find studies with sufficiently similar design parameters, they employ ad hoc procedures to impute an ICC. For example, \citeA{puzioDifferentiatedLiteracyInstruction2020a} imputed a value of 0.2 for an ICC approximation based on ICC values that \citeA{hedgesIntraclassCorrelationValues2007a} reported where the mean (across grade level) ICC for reading outcomes was .224. While \citeA{grahamEffectsWritingLearning2020} took the median of the ICC values across all educational outcomes reported in \citeA{hedgesIntraclassCorrelationValues2007a}. The What Works Clearinghouse Procedures Handbook v. 5.0 \fullcite{institute_of_education_sciences_what_2022} recommends imputing an ICC value of .20 for achievement outcomes and .10 for behavioral outcomes. However, those values might be inaccurate and might not be relevant to all sub-types of outcomes and study designs more generally. And as noted earlier, inaccurate ICCs can negatively impact results from a priori power and meta-analysis inferences based on their use.
+  
+\subsubsection{Confidence Interval Estimates of the ICC}
+Instead of only imputing a value from a previous study of similar design, other researchers have suggested adjusting for potential uncertainty in the ICC parameter by constructing confidence interval estimates and using the upper limit as the imputed value \cite{donner1986}. Using the variance formulas discussed in detail later and assuming that ICC estimates are approximately normally distributed, confidence intervals can be constructed for the ICC value. To avoid under-powering a study, applied researchers could use the upper limit of a 95\%  confidence interval estimate of $\rho$ as a conservative ICC estimate to substitute in a power analysis. However, use of the upper limit value can project a larger than necessary sample size (Donner, 1986) from power analyses and can result in less accurate adjustments when meta-analyzing effect sizes from clustered data. 
+
+\subsubsection{Utilizing Bayesian Methods to Estimate ICC values}
+Another proposed method of obtaining ICC estimates utilizes a Bayesian framework which is not often implemented by applied researchers in social science research. Instead of hypothesizing a single true ICC value, a plausible prior distribution can be assumed to derive a posterior distribution of ICC values. With an aim to capture reasonable ICC estimates for analyses, \citeA{spiegelhalter2001} discussed the use of eight different priors that could be placed on the multilevel model’s variance components from Equation \ref{ICC_algebra} and the ICC.  \citeA{spiegelhalter2001} evaluated the priors through an empirical Markov chain Monte Carlo (MCMC) demonstration and found that the inverse gamma priors, the log-uniform prior, and the uniform shrinkage prior all led to substantially smaller estimates of the ICC which would result in increased power in the prospective designs. Findings from this study recommended using the uniform prior for ICC, or the uniform shrinkage prior, among the uninformative prior options when estimating an ICC. The work of \citeA{spiegelhalter2001} relies on the availability of the raw data in order to specify the likelihood function. However, when conducting power analyses or meta-analyses, previous estimates of ICCs are rarely accompanied by the raw data, and researchers must rely on summary statistics instead. 
+
+To develop a method that relies on summary statistics instead of raw data when estimating an ICC, \citeA{turnerAllowingImprecisionIntracluster2004} compared possible forms for the likelihood function of ICC estimates using methods described in \citeA{donner1986} and \citeA{ukoumunneComparisonConfidenceInterval2002}. The proposed likelihood distribution functions do not rely on raw data and only require values for the ICC estimate, the total number of observations, and the total number of clusters. \citeA{turnerAllowingImprecisionIntracluster2004} conducted an empirical MCMC demonstration to construct posterior distributions for the true ICC value using the various forms of the likelihood when paired with a Uniform(0, 1) prior. Then they transformed the resulting posterior distribution into a distribution of power values. As noted earlier and discussed in greater detail later, the distributional form of an ICC is unknown, and the methods of \citeA{turnerAllowingImprecisionIntracluster2004} rely heavily on the assumptions made about the likelihood. Furthermore, her demonstration only used one or six ICC estimates so the conclusions were entirely dependent on the prior and likelihood choices. Thus, while there are a number of ad hoc suggestions for imputing an ICC estimate, there are challenges with each of those listed. In the next section, we describe how a more principled synthesis of prior ICC estimates could be used to impute a reasonable value.
+
+
+\subsection{Characteristics of the Distribution of ICCs}
+
+Pooling ICC estimates requires the knowledge of its sampling distribution. The true distribution of an ICC is unknown; therefore, the validity of any assumption is unclear. Despite the sampling distribution of the ICC being unknown, several methods have been proposed to construct confidence intervals for the ICC to capture uncertainty in the parameter. 
+
+\citeA{ukoumunneComparisonConfidenceInterval2002} and \citeA{donner1986} detail several methods for constructing confidence intervals for $\rho$ where the sampling distribution of ICC estimates and transformed ICC estimates are assumed to follow a normal distribution \cite{fisherTheoryStatisticalEstimation1925, hedgesVarianceIntraclassCorrelations2012, donner1980a, smith1957, swiger1964}. There are several empirical studies that have summarized the distributional shape of ICC estimates that they have gathered. For example, \citeA{hedbergReferenceValuesWithinDistrict2014} assessed the distribution of 3,555 within-district ICC estimates they collected and found it to be non-normal and highly skewed. Therefore, assumptions about the ICC distribution following a normal distribution are likely often violated in practice and negate the validity of using confidence interval estimates of the ICC, which have traditionally assumed a normal distribution for ICC estimates. 
+
+Regarding the variance of an ICC estimate, $v_r$, researchers have derived different formulae for large samples. \citeA{smith1957} proposed a large sample approximation to the variance of the ICC estimate by using the weighted mean cluster size ($n_0$):
+
+\begin{equation}\label{weighted_mean}
+n_0 = \frac{1}{j-1}N-\sum_{i=1}^j\frac{n_i^2}{N},
+\end{equation}
+where $j$ is the number of clusters, $N$ is the total sample size, and $n_i$ is the number of units in the $i$th cluster. The formula derived by \citeA{smith1957} for the variance of an ICC estimate is as follows:
+\begin{equation}\label{smith}
+    \begin{split}
+v_r= &[2(1-r)^2/n_0^2](\{[1+r(n_0-1)]^2/(N-j)\} + \{(j-1)(1-r)[1+r(2n_0-1)] \\
+&+ r^2[\sum n_i^2 - 2N^{-1}\sum n^3_i + N^{-2}(\sum n_i^2)^2]\}/(j-1)^2),
+    \end{split}
+\end{equation}
+
+\noindent where $r$ is an estimate of $\rho$. \cite{swiger1964}'s formula for $v_r$  \cite{swiger1964} is a variation of Smith's approach, Equation \ref{smith}, with a simpler formula for the variance of the ICC estimate:
+\begin{equation}\label{swiger}
+v_r=   \frac{2(N-1)(1-r^2)[1+(n_0-1)r]^2}{n_0^2(N-j)(j-1)}.
+\end{equation} 
+Using the delta method, \citeA{hedgesVarianceIntraclassCorrelations2012} derived the large sample variance of an ICC estimate for a two-level model in designs with equal cluster sizes as follows:
+\begin{equation}\label{hedges_two_level_var}
+v_r= \frac{(1-r)^2v_2}{(\sigma_e^2+\sigma^2_u)^2},
+\end{equation}
+
+\noindent where $v_2$ is the variance of $\sigma^2_u$. The variance of the level-2 variance is commonly not reported in primary research studies, so applied meta-analysts will not be able to implement it unlike other formulae that do not require it. 
+
+\citeA{hedgesVarianceIntraclassCorrelations2012} stated that in balanced designs with equal cluster sizes,  Equation \ref{hedges_two_level_var} is equivalent to the estimation derived by \citeA{fisherTheoryStatisticalEstimation1925} for large samples.  The formula derived by \citeA{fisherTheoryStatisticalEstimation1925} is as follows:
+\begin{equation}\label{fisher_two_level_var}
+ v_r=\frac{2(1-r)^2[1+(n-1)r]^2}{n(n-1)(j-1)}.
+\end{equation}
+
+For designs with unequal cluster sizes, \citeA{donner1980a} derived a formula for large sample variance of $\rho$ estimates as follows:
+\begin{equation}\label{donner_two_level_var}
+ v_r=\frac{2N(1-r)^2}{N\sum_{i=1}^{j}n_i(n_i-1)\hat{V_i}\hat{W_i}^{-2}-r^2\Big[\sum_{i=1}^{j}n_i(n_i-1)\hat{W_i}^{-1}\Big]^2},
+\end{equation}
+
+\noindent where $\hat{W_i} = 1 + (n_i-1)r$ and $\hat{V_i} = 1 + (n_i-1)r^2$. With equal cluster sizes, when $n_1=...=n_j=n$, Equation \ref{donner_two_level_var} reduces to Fisher's formulation, Equation \ref{fisher_two_level_var}. 
+
+Finally, there is also Fisher's method using a large sample approximation to the standard error of a normalizing transformation of $\rho$ \cite{fisher1970statistical}. First, the ICC estimates are assumed normally transformed using the following:
+\begin{equation}\label{fisher_transformed_ICC}
+ Z_F=\frac{1}{2} \ln  \frac{1+(n_0-1)r}{1-r},
+\end{equation}
+and then the corresponding variance formula is:
+\begin{equation}\label{fisher_transformed_ICC_var}
+ v_r=0.5\{(j-1)^{-1}+(N-j)^{-1}\}.
+\end{equation}
+
+In summary, \citeA{fisherTheoryStatisticalEstimation1925} derived a formula for $v_r$ that requires the ICC estimate, the average cluster size, and the number of clusters. \citeA{swiger1964} presented a formula that is the same as Fisher’s formula except scaled by a function of the total number of individuals in the sample. \citeA{hedgesVarianceIntraclassCorrelations2012} derived a formula requiring knowledge of the variance of the level-2 random effects variance for a primary study which is often not reported in primary studies. \citeA{donner1980a} and \citeA{smith1957} derived formulas for unbalanced cluster sizes; the \citeA{donner1980a} formula is equivalent to Fisher’s formula when cluster sizes are equal. \citeA{fisher1970statistical} presented a formula that uses a normalizing transformation of the ICC estimate and requires only the weighted mean cluster size and the ICC estimate. The aim of this study is to compare how well these variance formulas work when quantitatively synthesizing ICC estimates. 
+
+Across all of these methods, it is unclear which formulation offers the best approximation of the variance of the sampling distribution of ICC estimates. Furthermore, it is unknown if the distributional assumptions made by these methods are accurate since the distributional form of an ICC has not been derived. Methods for pooling ICC estimates that are agnostic to distributional form therefore may provide an ideal alternative because they do not require strong assumptions about the distributional shape of the statistic being pooled. 
+
+\subsection{Estimating Variance Parameters}
+Accurate estimation of the ICC requires unbiased estimates of the variance components used in its calculation (see equation \ref{ICC_algebra}). Methodologists typically focus on obtaining correct estimates for the fixed effects and their standard errors when using the MLM. In MLM, under both full maximum likelihood (FML) and restricted maximum likelihood (REML; \cite{corbeil1976}), level-1 variance estimates are typically robust to small samples, assumption violations, and model misspecification. However, \citeA{maas2005} found that level-2 variance components are generally underestimated using REML except when level-2 variance components were estimated with ten clusters of five level-1 units per cluster, the estimates had an upward bias of 25\% \cite{maas2005, mcneish2016}.
+
+\citeA{browne2006a} also compared FML and REML in a simulation study and found that REML estimates of level-2 variance components exhibited negligible bias with six clusters of 18 level-1 units per cluster. \citeA{mcneish2016} stated that the conflicting results of these two simulation studies with regards to REML performance at recovering the true level-2 variance component value are due to the different number of cluster sizes used. Furthermore, \citeA{mcneish2016} stated that FML and REML estimation methods result in similar estimates when the number of clusters is large. When the number of clusters is small, however, REML provides less biased estimates of the variance components compared to FML. This is because FML estimates the fixed and random effects variance parameters simultaneously, while REML estimates them separately so the fixed effects do not influence the variance components' estimation \cite{mcneish2016, raudenbushHierarchicalLinearModels2002, searle2009variance}. 
+
+Beyond FML and REML, there are other methods used for estimation in MLM such as Bayesian MCMC estimation \cite{mcneish2016}, bootstrapping methods \cite{huang2016alternatives, dedrick2009, maas2005, mcneish2016}, and method of moments estimation \cite{hedbergReferenceValuesWithinDistrict2014}, but these methods are not implemented as frequently in practice as FML and REML. Commonly used software typically use defaults of FML or REML for estimating the MLM. For example, SAS Proc Mixed \cite{manthena}, R package \emph{lme4} \cite{bates2015}, HLM 8\cite{raudenbush2019}, and SPSS \cite{spss} use REML by default; and STATA \cite{dsginideco1}, the R package \emph{lavaan} \cite{rosseel2012}, and MPLUS \cite{lk2020muthen} use FML as a default. Since there are a variety of estimations methods, we decided to focus on implementing REML in capturing the variance components used for calculating the ICC. 
+
+\subsection{Meta-Analytic Methods to Pool ICC Estimates}
+In the next section, we review the most commonly used meta-analytic methods of relevance to this study. Ultimately, the hope is that an applied researcher could use these methods to pool ICC estimates from prior studies to be imputed for use in a secondary analysis (such as a power analysis of CRTs or meta-analysis of effects from clustered data), and that the resulting pooled ICC reflects the relevant population and research context.
+
+One of the fundamental application of meta-analysis entails pooling effect sizes from primary studies to obtain an overall effect size for the set of studies included in the analysis. The type of effect size varies depending on the type of data and the research questions of the primary studies and most typically include standardized mean differences, log odds ratios, and correlations (H. Cooper, Hedges, \& Valentine,
+2009). Typically, an effect size is assumed to follow a normal distribution (otherwise, it is transformed to follow an approximate normal distribution) with a known sampling standard error \cite{hedgesWhatAreEffect2008}. The standardized effect size for study $i$ is generically represented as $T_i$. For this study, the ICC estimate is the "effect size" that is being pooled using meta-analytic techniques. 
+
+In meta-analytic pooling, assuming that there are $k$ studies included in a meta-analysis, that each study reports one independent effect size (simplest scenario), $T_i$, for studies $i= 1,...,k$. Then effect sizes are pooled using the following:
+
+\begin{equation}\label{fixed_pool}
+\hat{\mu} = \frac{\sum_{i=1}^k w_iT_i}{\sum_{i=1}^k w_i}
+\end{equation}
+
+\noindent where $w_i$ are model-dependent weights specified by the analyst. The most typical weight applied is the inverse of the effect size's variance estimate. 
+
+%\subsubsection{Fixed and Random Effects Models}
+
+%The fixed effects model assumes that all of the studies are sampled from a population with the same true effect size parameter\cite{higgins2009re}:
+
+%\begin{equation}
+%    T_i = \mu + \epsilon_i
+%\end{equation}
+
+%\noindent where $\mu$ is the true average population effect size and $T_i..T_k$ are typically assumed to follow a normal distribution. Each study has sampling error, $\epsilon_i$ that is typically assumed to be $\sim \mathcal{N}(0,\,v_i)$. If using inverse variance weights in a fixed effects model, the weight for study $i$'s effect estimate would be estimated by: $W_i=\frac{1}{\hat{v_i}}$. 
+
+%However, if a researcher wants to generalize to a population of studies beyond the sample, then assuming a random effects model would be more appropriate because it assumes that the parameters underlying the studies follow their own distribution \cite{higgins2009re}. The random effects model estimates a between-study variance to account for differences between studies. The total variability between effect size estimates is now assumed to be due to a combination of sampling error and between-study variability: 
+
+%\begin{equation}\label{randomeffectsmeta}
+%T_i = \mu + \epsilon_i + u_i. 
+%\end{equation}
+
+%The between-study residuals, $u_i$, are assumed to be  $\sim \mathcal{N}(0,\,\tau^{2}_\rho)$. The variance of the effect sizes in a random effects model is the sum of ${v}_i$ and $\hat{\tau}_{\rho}^2$. Consequently, if using inverse variance weighting, the weights in a random effects model become:  $W_i=\frac{1}{({v}_i+\hat{\tau}_\rho^2)}$. 
+
+\subsubsection{Using REML Estimation to Estimate the Pooled ICC} 
+While there are many estimation methods for random effects meta-analytic models, REML is the default of the meta-analytic R software package \emph{metafor} \cite{viechtbauer2010} and is commonly used in most meta-analysis packages. Unlike other maximum likelihood estimators that negatively bias the effect size estimates' variance component, REML corrects for this and has been adapted for meta-analytic random effects pooling\cite{raudenbush2009analyzing, viechtbauer2015}.
+
+%Following the procedures put forth by \citeA{viechtbauer2015}, the estimated value of $\hat{\tau}_{\rho}^2$ by REML is given by the value that maximizes the restricted log-likelihood as follows:
+
+%\begin{equation}\label{REML_est}
+%\begin{split}
+%        ll_{REML} &= -\frac{1}{2}k \ln(2\pi) + \frac{1}{2}\ln|\mat{X}^{'}\mat{X}| - \frac{1}{2}\ln|\tau_{\rho}^2\mat{I}+\mat{V}| \\
+%        & -\frac{1}{2}\ln|\mat{X}^{'}\mat{W}\mat{X}| -\frac{1}{2}\mat{y}^{'}\mat{P}\mat{y}
+%\end{split}
+%\end{equation}
+%where $\mat{y}$ is a $k \times 1$ column vector with $k$ effect size estimates, $\mat{X}$ is a $k \times (p +1)$ matrix where $p$ is the number of covariates (the first column contains vector of ones for the intercept), $\mat{V}$ is a vector of the within-study sampling variances of the studies,  $\mat{W}$ is a $k \times k$ matrix with elements of $W_i$, and $\mat{I}$ is a $k \times k$ identity matrix \cite{viechtbauer2015}. The estimation procedure uses the Fisher scoring algorithm \cite{harville1977maximum, jennrich1976newton} because it is robust to poor starting values with $\Delta$ equal to \cite{viechtbauer2015}:
+%\begin{equation}\label{REML_delta}
+%    \Delta_{REML} = \frac{\mat{y}^{'}\mat{P}\mat{P}\mat{y} - tr(\mat{P})}{tr(\mat{P}\mat{P})}.
+%\end{equation}
+
+%REML utilizes step halving which avoids estimating negative update values for $\hat{\tau}_{\rho}^2$ \cite{viechtbauer2015}. 
+
+  
+\subsubsection{Using Robust Variance Estimation to Estimate the Pooled ICC} 
+Robust variance estimation (RVE; \cite{hedges2010}) is an alternative meta-analysis regression model estimation approach. It is typically employed to account for dependence among multiple effect sizes within studies when estimating standard errors. More generally, RVE uses the weighted least squares (WLS) framework, which incorporates a set of weighting matrices in estimation. It was adapted by Tipton (2015) for meta-analyses involving only a small number of studies using Satterthwaite degrees of freedom correction. When there is no dependence among effect sizes, as is the case with a random effects model with independent effect sizes,  RVE can also be used to obtain robust estimates of the overall pooled effect and its associated variance due to RVE being robust to the distributional shape of the effect size being pooled \cite{hedges2010}. RVE estimates parameters using method-of-moment estimators proposed by \citeA{hedges2010}.
+
+RVE does not require knowledge of the exact covariance structure between pairs of effect size estimates because the variances of the meta-regression coefficients are estimated with sandwich estimators using the cross-product of observed residuals to estimate the covariance between pairs of effect sizes rather than the known covariances \cite{hedges2010, tipton2015}. RVE is used with a variety of data structures that include those that are nested or correlated.
+
+
+
+%For example, let us assume there were multiple effect sizes per study and there were covariates in the meta-regression model, then Equation \ref{randomeffectsmeta} can be rewritten as follows. 
+
+%Assuming that there are $T_1, ..., T_k$ effect size estimates nested in $q = 1,..., s$ clusters of estimates (primary studies), then a  meta-analytic model can be written as follows including a set of $p$ covariates  \cite{hedges2010, tipton2015}: 
+
+%\begin{equation}
+%\label{metareg}
+%\mat{T}_q = \mat{{X}}_q \bs{\beta} + \bs{\epsilon}_q
+%\end{equation}
+%where $\mat{T}_q$ is a  $k_q \times 1$ vector of effect size estimates from study $q$, $\mat{X}_q$ is a $k_q \times p$ matrix of covariates, $\bs{\beta}$ is a $p \times 1$ vector of coefficients, and $\bs{\epsilon}_q$ is a $k_q \times 1$ vector of errors with mean of 0 and covariance matrix $\mat{\Psi}_q$ for studies $q = 1, .., s$ \cite{hedges2010, tipton2015}.
+
+%Let $\mat{W}$ be a block diagonal matrix of weights with components $W_1,....,W_s$ and let $\mat{M} = (\mat{X}^{'}\mat{W}\mat{X})^{-1}$ \cite{tipton2015}. The weighted least squares estimate of $\bs{\beta}$ in Equation \ref{metareg} is found by \cite{tipton2015}:
+
+%\begin{equation}
+%\label{wls}
+%\mat{b} = \mat{M}\left(\sum_{q = 1}^{s} {\mat{X}_q^{'} \mat{W}_q \mat{T}_q}\right)
+%\end{equation}
+%The exact variance of $\mat{b}$ is:
+%\begin{equation}
+%\label{vb}
+%Var(\mat{b}) = \mat{M}\left[\sum_{q = 1}^{s} {\mat{X}_q}^{'} \mat{W}_q \mat{\Psi}_{q} \mat{W}_q \mat{X}_q\right] \mat{M}
+%\end{equation}
+
+%Because $\mat{\Psi}_{q}$ is not often known due to the limited amount of information reported in primary studies, the direct calculation of Equation \ref{vb} is generally not possible \cite{hedges2010}. Instead, the RVE estimator is robust to the specification of  $\mat{\Psi}_{q}$. The RVE estimator is as follows:
+
+%\begin{equation}
+%\label{vrve}
+%\mat{V^R} = \mat{M}\left[\sum_{q = 1}^{s} \mat{X}_q^{'} \mat{W}_q \mat{A}_q \mat{e}_q \mat{e}^{'}_q \mat{A}_q \mat{W}_q \mat{X}_q\right] \mat{M}
+%\end{equation}
+%where $\mat{e}_q$ is the vector of residuals for study $q$ equal to $\mat{e}_q = \mat{T}_q - \mat{X}_q \mat{b}$ and
+%$\mat{A}_q$ is a $k_q \times k_q$ identity matrix  \cite{hedges2010, tipton2015}. 
+
+%When there is only one effect size per study, the equation for the weighted mean (intercept $b_1$) reduces to Equation \ref{fixed_pool} since the number of effect sizes equals the number of studies, $n_{ES} = s$,  and  the robust variance estimate is as follows:
+
+%\begin{equation}\label{rve_pooled_var}
+%v^R = \frac{\sum_{q=1}^s w_{1q}^2(T_{1q}-b_1)^2}{(\sum_{q=1}^s w_{1q})^2}.
+%\end{equation}
+
+Even though any set of weights can be used, the inverse variance weights are typically specified because if the working model is correct, using inverse variance weights will result in a fully efficient estimator \cite{hedges2010}. There are different formulations of the inverse variance weights depending on the assumptions made about the working model \cite{hedges2010}. Because the true covariance structure between effect sizes is unknown, exact inverse variance weights cannot be calculated. 
+
+Since we evaluate only one ICC per study in this study, the working model will also be a random effects model and the weight will be specified as $W_i=\frac{1}{(\hat{v}_i+\hat{\tau}_\rho^2)}$. However, instead of using REML for estimation,  \citeA{hedges2010} used method of moments estimation to estimate the $\tau_{\rho}^2$ and the weights in the RVE technique. So, essentially, when the working model is a random effects model with independent effect size (as we use in the current study) the comparison between RVE and REML is really a comparison between REML and the method of moments estimation of the between-study variance, $\tau_\rho^2$.
+
+%\begin{equation}
+%\label{qe}
+%Q_E = \left(\sum_{q = 1}^{s} {\mat{T}_q^{'} \mat{W}_q \mat{T}_q}\right) - \left(\sum_{q = 1}^{s} {\mat{T}_q^{'} \mat{W}_q \mat{X}_q}\right)  \left(\sum_{q = 1}^{s} {\mat{X}_q^{'} \mat{W}_q \mat{X}_q}\right)^{-1} \left(\sum_{q = 1}^{s} {\mat{X}_q^{'} \mat{W}_q \mat{T}_q}\right)
+%\end{equation}
+
+%and 
+
+%\begin{equation}
+%\label{qr}
+%Q_R = \left(\sum_{q = 1}^{s} {\mat{T}_q^{'} \mat{W}_q \mat{X}_q}\right)  \left(\sum_{q = 1}^{s} {\mat{X}_q^{'} \mat{W}_q \mat{X}_q}\right)^{-1} \left(\sum_{q = 1}^{s} {\mat{X}_q^{'} \mat{W}_q \mat{T}_q}\right)
+%\end{equation}
+
+
+%the method of moments estimators for  $\tau_\rho^2$ is 
+
+%\begin{equation}\label{new}
+%\hat{\tau}_{\rho}^2 = \frac{p - Q_R}{A - B} - B \left( \frac{Q_R + Q_E - n_{ES}}{C  \left(A - B \right) } \right)
+%\end{equation}
+%where $p = 1$ since we are only estimating the intercept and 
+%\begin{align*} \label{MM_parts}
+%A = tr(\mat{V}\sum_{q = 1}^{s} {\mat{X}_q^{'} \mat{W}_q \mat{Q}_q \mat{W}_q \mat{X}_q}), & \quad B = tr(\mat{V}\sum_{q = 1}^{s} {\mat{X}_q^{'} \mat{W}_q^2 \mat{X}_q}), & and \quad C = \sum_{q = 1}^{s} \sum_{i = 1}^{k_q} w_{iq}
+%\end{align*}
+%where $\mat{Q_q}$ is a $k_q \times k_q$ matrix of 1's \cite{hedges2010}. 
+
+RVE has two advantages over typical meta-analytic pooling that uses estimation methods like REML. First, the RVE estimate of the variance of the weighted mean effect size is an unbiased estimate regardless of the choice of weights. The lack of reliance on choice of weights means a lack of dependence on effect size estimate variance specification because the weights are typically a function of those variances. Second, RVE performs well without requiring strict distributional assumptions for analyses of effect size estimates. Because the aim of this study is to pool ICC estimates (as the "effect sizes" being meta-analytically pooled), these advantages are useful because the distributional form and the variance of the sampling distribution of ICC estimates are unknown. For optimal performance, other models or methods of pooling rely on distributional assumptions or weight specification for accurate estimation of parameters.
+
+\subsubsection{Applied Meta-Analyses of ICC estimates}
+
+Meta-analytically pooling ICC estimates is not a novel notion. A few applied researchers have used these methods to find representative ICC values for specific research designs, outcome types, and populations. \citeA{hedbergReferenceValuesWithinDistrict2014} meta-analyzed ICC values collected from districts estimated from raw data. The ICC values in the dataset were estimated using REML \cite{hedges2013}. Then, the authors used the random effects model to pool the within-district ICCs estimates using a methods of moments estimator derived by Hedges and Vevea (1998) to account for the sampling error and the variance in the district ICC values around the population average ICC. For the variance of the ICC, they used the large sample variance derived by \citeA{fisherTheoryStatisticalEstimation1925}, see Equation \ref{fisher_two_level_var}. The authors also evaluated the distributions of the within-district ICC values they estimated. All of the distributions were highly right-skewed.
+
+Because ICC values fluctuate across research design characteristics, \citeA{stockford2009} conducted a quantitative synthesis of a distribution of ICCs (n = 176, k = 63) for educational achievement outcomes in the United States. The distributional form for two-level models' ICCs differed substantially from the distributions of three-level models' ICCs. The distributions of ICCs for level-three variances were more skewed than two-level models' ICCs.
+
+In another applied example of a meta-analysis ICC estimates, \citeA{kivlighan2020} meta-analyzed ICCs from cluster randomized trials of group therapy. The meta-analysis summarized 169 ICC estimates from 37 studies using RVE. The researchers used RVE to handle the within-study dependency in ICCs resulting from multiple ICC values being reported per study. For the inverse variance weights, the authors estimated the variance of the ICC, $v_r$, using the formula proposed by \citeA{hedgesVarianceIntraclassCorrelations2012} which requires the variance of the cluster-level variance. There were several limitations to methods used by  \citeA{kivlighan2020}. First, the authors did not provide the exact variance they used in the meta-analysis only the weights, so we could not verify how they were able to calculate the variances of the ICC estimates. They did not detail any assumptions they made about the variance of the cluster-level variances used when calculating the ICC estimate variances. Furthermore, they pooled ICC estimates at level-2 and ICC estimates at level-3 together. The range of ICC estimates at different nesting levels have been found to vary \cite{hedgesIntraclassCorrelationValues2007a, hedges2013}, so pooling ICC estimates from different levels of a MLM does not seem to be appropriate.
+
+%We could find no research that has explicitly evaluated the use of RVE for synthesis of ICC estimates. 
+
+\subsubsection{Methodological Research of Meta-Analyses of ICC estimates}
+
+Across two simulation studies, \citeA{ahnUseEstimatedIntraclass2012} evaluated synthesis of standardized mean difference effect sizes when the primary studies were a mix of research designs including 2-level clustered and individual randomized design studies. To compute the ICC needed for correcting effect sizes for clustering, they pooled the log-transformed cluster and total standard deviations (separately)   \cite{raudenbushHierarchicalLinearModels2002}. The first simulation study aimed to see how well the true ICC was captured by pooling the sampled studies' standard deviation components. The authors fixed the number of clusters and individuals per cluster to 30 (not evaluating other cluster nor per cluster sizes) and varied the population ICC value, mean differences between treatment and control, and the number of cluster-level and individual-level studies in the sample. Across these conditions, they found that the estimated ICC was unbiased and fairly precise using relative bias and mean squared error as performance criteria. 
+
+The second simulation that the authors conducted evaluated the use of the estimated ICC in a meta-analysis. They generated a meta-analytic dataset and varied the number of studies with and without clustering, population ICC value, population mean difference, and total number of studies in the meta-analysis. They found that the overall effect size estimates that resulted from using a default ICC of .2 or not correcting for clustering at all were both substantially biased. 
+
+In this study, the authors did not detail the estimation procedure they used for obtaining the cluster-level and total variance components used to calculate each study's ICC. In addition, to pool standard deviations across studies, the scale of the outcome has to be assumed constant across all studies in the meta-analysis. This greatly limits the use of the authors' method for synthesizing ICCs using the reported cluster and total variances. However, the substantial bias found when a generic rather than more accurate ICC value is used for correcting effect sizes for clustering is critical and relevant to this study. These findings highlight the importance of determining the optimal procedure for pooling ICCs to obtain an accurate ICC estimate.
+
+ 
+
+ 
+
+
+
+
+
+    
+  
+
