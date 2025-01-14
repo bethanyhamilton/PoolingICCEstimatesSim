@@ -1,0 +1,145 @@
+
+
+
+
+
+
+To study the relative performance of various meta-analytic methods for pooling ICC estimates, we conducted a Monte Carlo simulation study that replicates realistic conditions under which such methods may be employed. We evaluated whether RVE \cite{hedges2010} or REML \cite{viechtbauer2015} with random effects pooling and different weight specifications resulted in unbiased ICC parameter estimates by creating meta-analytic datasets of ICCs estimated from raw data. We first generated raw data with a two-level nested structure for each primary study, while adding in between-study heterogeneity. Then, for each primary study in the simulated meta-analysis, we estimated the ICC using REML estimation for the variance components and then used the estimates of those variances to compute the study's ICC estimate. We also calculated the variance of the ICC estimate using several different formulae, see Equations \ref{smith}:\ref{fisher_transformed_ICC_var}, to use as weights in the meta-analytic models. Finally, for each combination of conditions, we then built meta-analytic datasets of ICC estimates from each primary study in order to meta-analyze the ICCs and compare to the true ICC value used to generate the raw data.  
+
+\subsection{Data Generation Method}
+
+After generating for between-study heterogeneity in the true ICC estimates, as detailed below in section \ref{between-study}, we generated raw data for each primary study using a two-level unconditional random effects model (see Equation \ref{twolevel}). We sampled the cluster level residuals from $\sim \mathcal{N}(0,\,\sigma_u^{2})$ and the individual unit level residuals from $\sim \mathcal{N}(0,\,\sigma_e^{2})$. The values of $\sigma^2_u$ and $\sigma_e^2$ were manipulated as part of the simulation study. The value of the true intercept value, $\gamma_{00}$, was set to equal zero (see Equation \ref{twolevel}). 
+
+We varied the number of clusters, $j$, and average number of units per cluster, $\overline{n}_j$, because sample size has been found to affect the recovery of MLM variance components \cite{chang2015, mok1995sample}. We induced imbalance in the cluster sizes in order to evaluate the variance of the ICC estimate in scenarios with unbalanced cluster sizes \cite{donner1980a}. 
+%Note that only Equation \ref{donner_two_level_var} and Equation \ref{smith} allows for unequal cluster sizes as all the other formulae for the variance of the ICC estimate assume equal cluster sizes. 
+
+Accurate estimation of the variance components from the original primary study's raw data that are used to calculate the ICC is vital to reduce bias when pooling the ICC estimates. We used REML to estimate the level-1 and level-2 variance components (see Equation \ref{ICC_algebra}) and their associated variances because REML is often a default of many software and captures level-2 variance parameter. Then, we calculated the ICC value from the variance components and calculated the variance for the ICC using each of the formulae presented below. This process was repeated until the meta-analytic dataset was fully populated with an ICC estimate for each primary study generated. 
+
+\subsection{Experimental Design}
+In order to evaluate a large range of datasets with clustered data, we compared meta-regression model estimation methods paired with different ICC variance formulae for pooling ICCs for datasets created through manipulation of the number of clusters, number of individuals per cluster, the degree of balance between clusters, the true ICC values,  the magnitude of between-study heterogeneity, and the number ICC estimates to pool. 
+
+\subsubsection{Number of Clusters in Raw Data, \texorpdfstring{$j$}{j} }
+The recovery of MLM parameter estimates, their standard errors, and variance components is affected more by the number of clusters than by the number of individuals per cluster \cite{chang2015, mok1995sample}. For each primary study in a meta-analytic dataset, we sampled the number of clusters from a uniform distribution in order for it to vary across primary studies within a meta-analytic dataset. We chose a uniform distribution to be agnostic about the distribution of the number of clusters in multilevel data. We investigated two ranges of values for the number of clusters per primary study in a meta-analytic dataset: 30 to 50 or 50 to 100 representing a range of values common in applied cross-sectional multilevel research \cite{hsu2017}. 
+
+%Following the procedures of \citeA{hsu2017}, we investigate three different values for the number of clusters, 30, 50, and 100, used in the primary study's data representing a range of values common in educational research. 
+
+\subsubsection{Number of Individuals per Cluster,  \texorpdfstring{$n_j$}{nj} }
+We also varied the number of individuals per cluster across primary studies in a meta-analytic dataset by drawing from a uniform distribution because the optimal distribution to assume for cluster sizes is unknown. We used the following values for the bounds of the uniform distribution of average cluster sizes, $\overline{n}_j$, 10 to 30 or 30 to 50, reflecting the typical range of cluster sizes found in other multilevel simulation studies \cite{mcneish2016, hsu2017}. 
+
+Because only one of the variance formulae accounts for unequal cluster sizes, Equation \ref{donner_two_level_var} \cite{donner1980}, and it is reasonable to assume unequal cluster sizes, we decided that the primary studies' data sets should reflect this reality of applied datasets. To induce imbalance in the cluster sizes, we sampled the cluster sizes from a uniform distribution where the minimum and maximum values were a fixed proportion below and above the average sample size: $n_j \sim Unif[\overline{n}_j(1-\zeta),\quad   \overline{n}_j(1+\zeta)]$ where $\overline{n}_j$ is the condition's average per cluster sample size for cluster $j$ and $\zeta$ is the proportion of $\overline{n}_j$ that is added to and subtracted from the average cluster size to obtain the bounds of the uniform distribution. By doing this, the size of each cluster was different with the value falling within the range of $[\overline{n}_j(1-\zeta), \quad  \overline{n}_j(1+\zeta)]$. We decided to set the boundaries for the uniform distribution to be $\zeta = 0.5$ and $\zeta = 0.1$ of the $\overline{n}_j$ to vary the degree of imbalance in the primary dataset. 
+
+\subsubsection{True ICC Values, \texorpdfstring{$\rho$}{r} } For the true population values of the intraclass correlation, we used 0.05, 0.15, and 0.25 based on a review of ICCs found in educational research. \citeA{hedgesIntraclassCorrelationValues2007a} compiled databases of ICC values with values ranging from 0.045 to 0.271 in educational research settings. Simulation studies that varied ICC as a condition referenced Hedges and Hedberg's study \citeyear{hedgesIntraclassCorrelationValues2007a}  using ICC values within that range \cite{mcneish2016, rotondi2009, lai2015}. An ICC  value of 0.05 would be considered a relatively smaller value, while an ICC value of 0.25 would be considered a relatively large ICC for educational research. 
+
+
+
+\paragraph{Variance Components of the true ICC at Level-1, \texorpdfstring{$\sigma^2_e$}{s2e} , and Level-2, \texorpdfstring{$\sigma^2_u$}{s2u} }
+We manipulated the values of $\sigma^2_u$ and $\sigma^2_e$ to have a total variance of 100. 
+Solving for $\sigma^2_u$ in Equation \ref{ICC_algebra}, we determined the value of the level-2 variance for each condition by multiplying the total variance by the ICC value as specified by the conditions. Then, we found the level-1 variance by subtracting the level-2 variance from the total variance. Table \ref{table:varvalues} displays the combinations of level-1 and level-2 variances for respective ICC values of  0.05, 0.15, and 0.25 and a total variance of 10. 
+
+%We manipulated the value of the true variance because it is harder to estimate a variance with a true value that is closer to zero. 
+
+%\begin{equation}\label{ICC_manipulation}
+% \sigma^2_u = (\sigma^2_u + \sigma^2_e) \rho
+%\end{equation}
+
+\begin{table}[!h]
+\caption{Condition-Specific Variance Values}
+\begin{tabular}{llll}
+\toprule
+Total Variance                            & True Intraclass Correlation             & Level-1 Variance                           & Level-2 Variance \\ 
+\midrule
+
+$\sigma^2_u + \sigma^2_e = 100$                  & $\rho = 0.05$                             & $\sigma^2_e = 95$                               & $\sigma^2_u = 5$       \\
+                                          & $\rho = 0.15$                             & $\sigma^2_e = 85$                               & $\sigma^2_u = 15$      \\
+                                          & $\rho = 0.25$                             & $\sigma^2_e = 75$                               & $\sigma^2_u = 25$      \\
+\bottomrule
+\end{tabular}
+\label{table:varvalues}
+\end{table}
+
+\subsubsection{Between-Study Heterogeneity, \texorpdfstring{$\tau_{\rho}$}{tr} } \label{between-study}
+
+To introduce between-study heterogeneity ($\tau_{\rho}$) into the $\rho$ estimates, we used a uniform distribution because the shape of the distribution of ICCs is unknown. The boundaries of the distribution were $\rho \pm 2 \tau{\rho}$. For the values of $\tau_{\rho}$, we analyzed a dataset that includes raw English Language Arts and mathematics tests scores for students participating in the Massachusetts Comprehensive Assessment System (MCAS). For each district with five or more schools, we estimated school-level ICCs using a two-level model. Then, we pooled the ICC estimates by grade level using REML and RVE estimation with the various variance formulae as weights (Equations \ref{smith}:\ref{fisher_transformed_ICC_var}). We found values of $\tau_{\rho}$ estimates between 0.026 and 0.058 and a median of 0.037. From these values we obtained the scale of $\tau_{\rho}$ for the ICCs. Since our smallest true ICC has a value of .05, and to avoid generating negative values for any ICC, we chose smaller values of $\tau_{\rho}$ of .01 and .02.
+
+
+\subsubsection{Number of Primary Studies, \texorpdfstring{$k$}{k} }
+
+
+
+For the number of primary studies to pool, we generated meta-analytic database sizes of 20, 50, and 100 studies. For the upper range of the number of ICC estimates to pool, we chose 150 since that is around the number collected by the applied meta-analysis of ICC estimates we found \cite{stockford2009, kivlighan2020} and represents a relatively large applied meta-analysis. We generated one ICC value per study as a starting point for this line of research. Future research can explore scenarios in which there might be multiple ICC estimates per study. 
+
+
+\subsubsection{Experimental Factors}
+
+Table \ref{table:datagen} lists the values for each condition that was examined in the study. The following factors are included in the study: 2 values for the number of clusters $\times$ 2 values for the average number of individuals per cluster $\times$ 2 values for the degree of imbalance $\times$ 3 values for $\sigma^2_e$ and $\sigma^2_u$ combinations $\times$ 3 values for number of pooled ICC estimates $\times$ 2 values for the between study heterogeneity, totaling 144 conditions. For the simulation we ran enough replications to ensure that there were 1,000 replications for which each estimation procedure converged.
+
+In addition, for each simulated dataset, we pooled the ICC estimate using a random effects meta-analytic model \cite{higgins2009re} with two different estimation procedures, RVE \cite{hedges2010} and REML \cite{viechtbauer2015}, each paired with six variance formulae used to calculate the ICC weights. 
+
+\begin{table}[h!]
+\caption{Data Generating Conditions}
+\begin{tabular}{ll}
+\toprule
+Conditions                                & Values                                                                               \\ 
+\midrule
+Number of clusters in raw dataset ($j$)                  & $\mathcal{U}$[30, 50], $\mathcal{U}$[50, 100]                                                                         \\
+Average number of units per cluster ($\overline{n}_j$)       & $\mathcal{U}$[10, 30], $\mathcal{U}$[30, 50]                  \\
+Degree of unbalance, $\zeta$ & .1, .5
+ \\
+ 
+Level-1/Level-2 variance ($\sigma^2_e/\sigma^2_u$)            &  95/5; 85/15; 75/25                                                          \\
+
+Number of primary Studies ($k$)            &  20, 50, 100                                                                      \\
+
+Between Study Heterogeneity ($\tau_{\rho}$) & .01, .02
+\\
+\bottomrule
+\end{tabular}
+
+
+\bigskip
+\small\textit{Note}. This study assumes one ICC value per primary study.
+
+\label{table:datagen}
+\end{table}
+
+
+
+\subsection{Analytic Methods}
+
+\subsubsection{Meta-analytic Methods}
+
+For each meta-analytic dataset of ICC estimates, we compared random effects pooling using REML \cite{viechtbauer2015} to random effects pooling using RVE \cite{hedges2010} when estimating the average pooled ICC estimate.
+
+All simulations were conducted in R \cite{rcoreteam2020a}. We used the \emph{robumeta} package \cite{fisher2017a} to implement the RVE model using the \textbf{robu()} function with the small- sample corrections for both the residuals and degrees of freedom \cite{tipton2015a}. We used the \emph{metafor} package \cite{viechtbauer2010} to fit the random effects model with REML estimation by setting the "method" argument in the \textbf{rma.uni()} function to "REML".
+
+\subsubsection{Variance of the ICC Estimate}
+We compared derivations of the variance for the ICC estimate when used as inverse variance weights in the meta-analytic pooling methods. We compared the formulae derived by \citeA{donner1980a}, \citeA{hedgesVarianceIntraclassCorrelations2012}, \citeA{fisherTheoryStatisticalEstimation1925}, \citeA{swiger1964},  \citeA{smith1957}, and \citeA{fisher1970statistical} which are Equations \ref{smith} through \ref{fisher_transformed_ICC_var} in the previous section.  We coded functions for each of these variance formulae in R.
+
+For Equation \ref{fisher_transformed_ICC_var}, additional steps were taken. First, we transformed the ICC estimates using Equation \ref{fisher_transformed_ICC} before implementing the meta-analytic pooling methods. We used the variance formulation presented by \citeA{fisher1970statistical} only for the transformed ICC estimates. Then, we back-transformed the overall pooled estimate. 
+
+\subsection{Performance Criteria}
+
+Because we aimed to determine how well each variance of the ICC and meta-analytic method recovers the value of the ICC parameter used to generate the raw data,  we captured the difference using the relative parameter bias (RPB) specified as:
+
+\begin{equation}
+  RPB(\hat{\rho}) = \frac{\overline{\hat{\rho}} - \rho}{\rho}
+\end{equation}
+where the RPB is the difference between the mean of pooled ICC estimates across all replications ($\overline{\hat{\rho}}$) and the true generating value of ICC divided by the true generating value of the ICC. If the value of the RPB is less than $\lvert0.05\rvert$ then that is considered an acceptable level of bias \cite{hoogland1998}. Furthermore, we captured the RPB of each variance component, as seen in Equation \ref{ICC_algebra} in order to determine if any source of bias in the pooled ICCs might be due to poorly estimated ICCs from the raw data.   
+
+We computed the root mean square error (RMSE) to measure the accuracy of the resulting estimators. RMSE evaluates the proximity of the average pooled ICC estimate to the true generating value of ICC and the precision of the estimation. When the variance of sampling distribution decreases, precision will increase. An RMSE value closer to 0 is ideal. For the true value of the ICC parameter, $\rho$ and its estimate, $\hat{\rho}$, RMSE is:
+
+
+\begin{equation}
+  RMSE(\hat{\rho}) = \sqrt{Var(\hat{\rho})+B(\hat{\rho})^2}
+\end{equation}
+where $Var(\hat{\rho}$ is the variance of the estimates of $\rho$ across replications, and $B(\hat\rho)$ is the bias in the estimates calculated as the difference between the mean pooled ICC estimate and its generating value: $B(\hat\rho)=\overline{\hat{\rho}} - \rho$.
+
+The primary motivation for this study was to assist researchers needing to impute an accurate pooled ICC estimate to use in a power analysis for clustered data or to correct effect sizes for clustering in primary study data used in a meta-analysis. Standard error estimates for the imputed ICC in these scenarios are not used. However, for researchers who intend to meta-analyze ICC estimates, we also evaluated which ICC pooling method results in the best standard error estimate for the pooled ICC estimate. We also captured the relative standard error bias (RSEB) of the SE for the pooled ICC estimate. We expect to see  differences in the SEs of the pooled ICC estimate when using different estimation procedures. We calculated RSEB using:
+
+\begin{equation}
+    RSEB(SE_{\hat{\rho}}) = \frac{ mean_{SE_{\hat{\rho}}} - s_{\hat{\rho}}  }{s_{\hat{\rho}}}
+\end{equation}
+where $mean_{SE_{\hat{\rho}}}$ is the mean of the standard error estimates and $s_{\hat{\rho}}$ is the standard deviation of the pooled ICC estimates across replications. 
+
+
+
