@@ -7,9 +7,9 @@ library(metafor)
 library(robumeta)
 
 
-source("1_gen_sample_ICC.R")
-source("2_estimate_pooledICC.R")
-source("3_performance_crit.R")
+source("sim/1_gen_sample_ICC.R")
+source("sim/2_estimate_pooledICC.R")
+source("sim/3_performance_crit.R")
 
 
 # ----------------------------------------------------------------------
@@ -49,7 +49,6 @@ run_sim <- function(iterations,
       
     }) %>% dplyr::bind_rows()
   
- # calc_performance(results = results)  
   
  if (summarize_results) {
    performance <- calc_performance(results = results)
@@ -76,15 +75,12 @@ set.seed(20240801)
 
 
 
-#too many conditions. cut this down
 design_factors <- list(
   icc_est_n = c(20, 50, 100),
- # icc_est_n = c(50, 150), #
   nj_size = c("small", "large"),
   n_bar_size = c("small", "large"),
   n_bar_prop = c(.1, .5),
   tau= c(.01,.02),
- #tau= c(.02),
   var_combo = c("small_large", "medium_large", "large_large")
 
 )
@@ -101,7 +97,7 @@ params <- expand.grid(c(design_factors, list(batch = 1:batches)))
 params$iterations <- total_reps / batches
 params$seed <- round(runif(1) * 2^30) + 1:nrow(params)
 
-
+params |> group_by(seed) |> tally()
 
 
 source_obj <- ls()
@@ -110,6 +106,8 @@ source_obj <- ls()
 batch_file <-  10
 params2 <- params %>% filter(batch == batch_file)
 params2$batch <- NULL
+
+params2 <- params2 |> slice(1:1)
 
 library(future)
 library(furrr)
@@ -143,7 +141,7 @@ tm
 session_info <- sessionInfo()
 run_date <- date()
 
-FileName <- paste("ICC_sim_results_smithcorr",batch_file,".Rdata",sep="")
+FileName <- paste("sim/data/ICC_sim_results_",batch_file,".Rdata",sep="")
 
 save(tm, params2, results, session_info, run_date, file =  FileName)
 

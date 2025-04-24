@@ -8,32 +8,22 @@
 ## data from unconditonal model 
 gen_uncond_data <- function(nj, l1_var, l2_var, n_bar = NULL, n_bar_prop = NULL, tau){
   
+  # ICC parameter
   icc_true = l2_var/(l2_var+l1_var)
   
-  # between-study heterogeneity
-  
-
-  
+  # between-study heterogeneity -- assuming uniform dist. 
   lower = (-2*tau) #
   upper = (2*tau)
-  
   u <-  runif(1, min = lower, max = upper)
-  
-
-  # add in check to make sure it is not less 0. throw away sample and make note.. this sample was below 0.
   icc_est <- icc_true + u
   
-  # find new L2 by using fixed L1. So, when looking at RPB for L2 will this be factored in?
+  # find new L2 by using fixed L1. 
   l2_var_new= l1_var*icc_est/(1-icc_est)
   
-
+  # generate sample sizes of primary studies 
   stopifnot( n_bar_prop >= 0 && n_bar_prop < 1 )
-  
-  # generate site sizes 
   n_min = ceiling( n_bar * (1 - n_bar_prop) )
   n_max = floor( n_bar * (1 + n_bar_prop) )
-  # num_ind <- sample( n_min:n_max, nj, replace=TRUE )
-  # num_ind <- round(runif(nj, min = n_min, max = n_max))
   
   if (n_min < n_max) {
     num_ind <- sample( n_min:n_max, nj, replace=TRUE )
@@ -42,11 +32,11 @@ gen_uncond_data <- function(nj, l1_var, l2_var, n_bar = NULL, n_bar_prop = NULL,
   }
   
   # cluster and individual ID values
-  uncond_data <- data.frame(cluster = rep(seq(1,nj), times = num_ind))
+  uncond_data <- data.frame(cluster = rep(seq(1, nj), times = num_ind))
   
   # Obtaining individual and cluster residuals
-  uncond_data <- uncond_data %>%
-    group_by(cluster) %>%
+  uncond_data <- uncond_data |> 
+    group_by(cluster) |> 
     mutate(individual = row_number(),
            cluster_resid = rnorm(1, 0, sqrt(l2_var_new)),
            ind_resid = rnorm(length(individual), 0, sqrt(l1_var)),
@@ -94,7 +84,7 @@ est_icc <- function(uncond_data) {
   ## ICC estimate
   icc_est <- clustervar / (clustervar + residvar)
   
-  ## need se of clustervar for hedges ICC var formulae. use fisher information matrix.
+  ## need var of clustervar for hedges ICC var formulae. use fisher information matrix.
   I <- Fisher_info(model, type = "expected")
   v2 <- diag(solve(I))[1]
   v1 <- diag(solve(I))[2]
@@ -104,8 +94,8 @@ est_icc <- function(uncond_data) {
   
   ## Fishers
   n <- as.numeric(
-    uncond_data %>% group_by(cluster) %>%
-      summarise(ni = length(individual), .groups = 'drop') %>%
+    uncond_data |>  group_by(cluster) |> 
+      summarise(ni = length(individual), .groups = 'drop') |> 
       summarise(mean = mean(ni), .groups = 'drop')
   )
   
@@ -113,7 +103,7 @@ est_icc <- function(uncond_data) {
   var_fisher <- (2 * (1 - icc_est) ^ 2 * (1 + (n - 1) * icc_est) ^ 2) / (n * (n - 1) * (m - 1))
   
   ## Donner
-  list <- model$groups %>% group_by(cluster) %>% tally() %>% select(n)
+  list <- model$groups |>  group_by(cluster) |>  tally() |>  select(n)
   
   W <- 1 + (list$n -1)*icc_est
   V <- 1+ (list$n -1)*icc_est^2
@@ -203,7 +193,8 @@ est_icc <- function(uncond_data) {
 
 
 
-### Generates data sets repeatedly and estimated ICC for each data set. returns only ICC estimates. how many do we create for a population??
+### Generates data sets repeatedly and estimated ICC for each data set for balanced designs. 
+#returns only ICC estimates.
 gen_icc <- function(icc_est_n, nj, n_bar, n_bar_prop, var_combo, tau){
   # different conditions for level 1 and level 2 variances
   if(var_combo == "small_large"){
@@ -227,8 +218,8 @@ gen_icc <- function(icc_est_n, nj, n_bar, n_bar_prop, var_combo, tau){
 
                       #   dat <- gen_uncond_data(nj, n_bar, n_bar_prop, l1_var, l2_var) # or gen_cond_data
                          cbind(possibly_est_icc(uncond_data = dat, tau= tau),nj,  n_bar)
-                       }, simplify = FALSE) %>%
-    dplyr::bind_rows() %>% mutate(study_id = row_number(), l1_var = l1_var, l2_var = l2_var)
+                       }, simplify = FALSE) |> 
+    dplyr::bind_rows()  |>  mutate(study_id = row_number(), l1_var = l1_var, l2_var = l2_var)
 
 
 
@@ -238,6 +229,7 @@ gen_icc <- function(icc_est_n, nj, n_bar, n_bar_prop, var_combo, tau){
 
 
 
+### Generates data sets repeatedly and estimated ICC for each data set for unbalanced designs. 
 
 gen_icc_unbalanced <- function(icc_est_n, nj_size, n_bar_size, n_bar_prop, var_combo, tau){
   if(nj_size == "small"){
@@ -281,8 +273,8 @@ gen_icc_unbalanced <- function(icc_est_n, nj_size, n_bar_size, n_bar_prop, var_c
                          
                          cbind(est_icc(uncond_data = dat), nj,  n_bar,  tau)
                          
-                       }, simplify = FALSE) %>%
- bind_rows() %>% mutate(study_id = row_number(), l1_var = l1_var, l2_var = l2_var)
+                       }, simplify = FALSE) |> 
+ bind_rows() |>  mutate(study_id = row_number(), l1_var = l1_var, l2_var = l2_var)
   
   
   
@@ -343,8 +335,8 @@ gen_icc_unbalanced <- function(icc_est_n, nj_size, n_bar_size, n_bar_prop, var_c
 #                    nj_size = "small",
 #                    n_bar_size = "small",
 #                    n_bar_prop= .5,
-#                    var_combo= "medium_large",
-#                    tau= .1)      )
+#                    var_combo= "large_large",
+#                    tau= .01)      )
 
 #hist(ICC_test_dist$icc_est)
 # 
