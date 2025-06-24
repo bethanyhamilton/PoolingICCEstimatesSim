@@ -14,21 +14,21 @@ gen_uncond_data <- function(nj,
                             tau) {
   
   # ICC parameter
-  icc_true = l2_var / (l2_var + l1_var)
+  icc_true <- l2_var / (l2_var + l1_var)
   
   # between-study heterogeneity - assuming uniform dist.
-  lower = (-2 * tau) 
-  upper = (2 * tau)
+  lower <- (-2 * tau) 
+  upper <- (2 * tau)
   u <-  runif(1, min = lower, max = upper)
   icc_est <- icc_true + u
   
   # find new L2 by using fixed L1
-  l2_var_new = l1_var * icc_est/(1 - icc_est)
+  l2_var_new <- l1_var * icc_est / (1 - icc_est)
   
   # generate sample sizes of primary studies
   stopifnot(n_bar_prop >= 0 && n_bar_prop < 1)
-  n_min = ceiling(n_bar * (1 - n_bar_prop))
-  n_max = floor(n_bar * (1 + n_bar_prop))
+  n_min <- ceiling(n_bar * (1 - n_bar_prop))
+  n_max <- floor(n_bar * (1 + n_bar_prop))
   
   if (n_min < n_max) {
     
@@ -63,9 +63,9 @@ gen_uncond_data <- function(nj,
 
 est_icc <- function(uncond_data) {
   
-  u = unique(uncond_data$u)
+  u <- unique(uncond_data$u)
   
-  L2_new = unique(uncond_data$L2_new)
+  L2_new <- unique(uncond_data$L2_new)
   
   possibly_model <- possibly(.f = lme, otherwise = NULL)
   
@@ -76,11 +76,11 @@ est_icc <- function(uncond_data) {
   
   if(is.null(model)){
     
-    converged = "no"
+    converged <- "no"
     
   } else{
     
-    converged = "yes"
+    converged <- "yes"
     
   }
 
@@ -125,7 +125,7 @@ est_icc <- function(uncond_data) {
   V <- 1 + (list$n - 1) * icc_est^2
   
   # Total Sample Size
-  N = model$dims$N 
+  N <- model$dims$N 
   
   # Donner
   var_donner <- (2 * N * (1 - icc_est)^2) / (N * sum(list$n * (list$n - 1) * V * (W^(-2))) - (icc_est^2 * (sum(list$n * (list$n - 1) * (W^(-1))))^2))
@@ -133,25 +133,25 @@ est_icc <- function(uncond_data) {
   #N = length(uncond_data$y)
   
   # weighted mean cluster size
-  n_0 = (1/(m - 1)) * (N - sum(list$n^2 / N))
+  n_0 <- (1/(m - 1)) * (N - sum(list$n^2 / N))
   
   # Swiger
   # uses weighted mean cluster size
-  var_swiger = (2 * (N - 1) * (1 - icc_est)^2 * (1 + (n_0 - 1) * icc_est)^2)/(n_0^2 * (N - m) * (m - 1))
+  var_swiger <- (2 * (N - 1) * (1 - icc_est)^2 * (1 + (n_0 - 1) * icc_est)^2)/(n_0^2 * (N - m) * (m - 1))
   
   
   ## Smith
-  pt1 = (2 * ((1 - icc_est)^2)/(n_0^2))
-  pt2a = (((1 + (icc_est * (n_0 - 1)))^2)/(N - m))
-  pt2b =(m - 1) * (1 - icc_est) * (1 + (icc_est * (2 * n_0 - 1)))
-  pt2c =(icc_est^2) * (sum(list$n^2) - ((2 * (N^(-1))) * sum(list$n^3)) + ((N^(-2)) * ((sum(list$n^2))^2)))
-  pt2d =(m - 1)^2
-  var_smith = pt1 * ((pt2a + ((pt2b + pt2c) / pt2d)))
+  pt1 <- (2 * ((1 - icc_est)^2)/(n_0^2))
+  pt2a <- (((1 + (icc_est * (n_0 - 1)))^2)/(N - m))
+  pt2b <- (m - 1) * (1 - icc_est) * (1 + (icc_est * (2 * n_0 - 1)))
+  pt2c <- (icc_est^2) * (sum(list$n^2) - ((2 * (N^(-1))) * sum(list$n^3)) + ((N^(-2)) * ((sum(list$n^2))^2)))
+  pt2d <- (m - 1)^2
+  var_smith <- pt1 * ((pt2a + ((pt2b + pt2c) / pt2d)))
   
   
   ## Fisher transformed 
-  icc_est_fisher_tf = .5 * log((1 + (n_0 - 1) * icc_est) / (1 - icc_est))
-  var_fisher_tf = .5 * (((m - 1)^(-1)) + ((N - m)^(-1)))
+  icc_est_fisher_tf <- .5 * log((1 + (n_0 - 1) * icc_est) / (1 - icc_est))
+  var_fisher_tf <- .5 * (((m - 1)^(-1)) + ((N - m)^(-1)))
   
   return(
     data.frame(
@@ -232,16 +232,15 @@ gen_icc <- function(icc_est_n,
   }
 
   icc_est <- replicate(icc_est_n, {
-                         possibly_gen_uncond_data <- possibly(.f = gen_uncond_data, otherwise = NULL)
-                         possibly_est_icc <- possibly(.f = est_icc, otherwise = NULL)
+                          dat <- gen_uncond_data(nj = nj, 
+                                                 n_bar = n_bar, 
+                                                 n_bar_prop = n_bar_prop, 
+                                                 l1_var = l1_var, 
+                                                 l2_var = l2_var, 
+                                                 tau = tau)
+    
 
-                         dat <- possibly_gen_uncond_data(nj = nj, 
-                                                         n_bar = n_bar, 
-                                                         n_bar_prop = n_bar_prop, 
-                                                         l1_var = l1_var, 
-                                                         l2_var = l2_var)
-
-                         cbind(possibly_est_icc(uncond_data = dat, tau= tau), nj, n_bar)
+                         cbind(est_icc(uncond_data = dat), nj, n_bar, tau)
                          }, simplify = FALSE) |> 
              dplyr::bind_rows() |>
              mutate(study_id = row_number(), 
@@ -372,15 +371,14 @@ gen_icc_unbalanced <- function(icc_est_n,
 # 
 # 
 # 
-#  tm4 <-
-#    system.time(
-# ICC_test_dist <- gen_icc_unbalanced(
-#                    icc_est_n= 150,
-#                    nj_size = "small",
-#                    n_bar_size = "small",
-#                    n_bar_prop= .5,
-#                    var_combo= "small_large",
-#                    tau= .01))
+# tm4 <-
+#   system.time( ICC_test_dist <- gen_icc_unbalanced(
+#                   icc_est_n= 150,
+#                   nj_size = "small",
+#                   n_bar_size = "small",
+#                   n_bar_prop= .5,
+#                   var_combo= "small_large",
+#                   tau= .01))
 #  tm4 <-
 #    system.time(
 # ICC_test_dist_neg <- gen_icc_unbalanced(
