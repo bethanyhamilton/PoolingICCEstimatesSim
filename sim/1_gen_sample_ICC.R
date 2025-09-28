@@ -293,21 +293,41 @@ gen_icc_unbalanced <- function(icc_est_n,
   # different conditions for level 1 and level 2 variances
   if(var_combo == "small_large") {
     
+    # 0.05 ICC
     l1_var <- 95
     l2_var <- 5
     
   } else if(var_combo == "medium_large") {
     
+    # 0.15 ICC
     l1_var <- 85
     l2_var <- 15
     
-  } else {
+  } else if(var_combo == "large_large") {
     
+    # 0.25 ICC
     l1_var <- 75
     l2_var <- 25
     
+  } else if(var_combo == "icc_0.1") {
+    
+    # 0.1 ICC
+    l1_var <- 90
+    l2_var <- 10
+    
+  } else if(var_combo == "icc_0.5") {
+    
+    # 0.5 ICC 
+    l1_var <- 50
+    l2_var <- 50
+    
+  } else {
+    
+    # 0.9 ICC 
+    l1_var <- 10
+    l2_var <- 90
+    
   }
-  
   
   icc_est <- replicate(icc_est_n, { 
                          nj <- sample(n_min:n_max, 1, replace=TRUE)
@@ -379,14 +399,14 @@ gen_icc_unbalanced <- function(icc_est_n,
 #                   n_bar_prop= .5,
 #                   var_combo= "small_large",
 #                   tau= .01))
-#  tm4 <-
-#    system.time(
+#   tm4 <-
+#     system.time(
 # ICC_test_dist_neg <- gen_icc_unbalanced(
-#                    icc_est_n= 150,
+#                    icc_est_n= 50,
 #                    nj_size = "small",
 #                    n_bar_size = "small",
 #                    n_bar_prop= .5,
-#                    var_combo= "large_large",
+#                    var_combo= "icc_0.9",
 #                    tau= .01)      )
 
 #hist(ICC_test_dist$icc_est)

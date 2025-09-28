@@ -7,9 +7,9 @@ library(metafor)
 library(robumeta)
 
 
-source("sim/1_gen_sample_ICC.R")
-source("sim/2_estimate_pooledICC.R")
-source("sim/3_performance_crit.R")
+source("1_gen_sample_ICC.R")
+source("2_estimate_pooledICC.R")
+source("3_performance_crit.R")
 
 
 # ----------------------------------------------------------------------
@@ -60,18 +60,18 @@ run_sim <- function(iterations,
 }
 
 # tm3 <- system.time(test <- run_sim(iterations = 1,
-#                 icc_est_n = 150,
+#                 icc_est_n = 10,
 #                 nj_size = "small",
 #                 n_bar_size = "small",
 #                 n_bar_prop = .5,
-#                 var_combo = "small_large",
+#                 var_combo = "icc_0.9",
 #                 tau = .01,
 #                # seed = 90870,
 #                 summarize_results = FALSE))
 
 # ----------------------------------------------------------------------
 
-set.seed(20240801) 
+set.seed(20250928) 
 
 
 
@@ -81,13 +81,17 @@ design_factors <- list(
   n_bar_size = c("small", "large"),
   n_bar_prop = c(.1, .5),
   tau= c(.01,.02),
-  var_combo = c("small_large", "medium_large", "large_large")
+#  var_combo = c("small_large", "medium_large", "large_large")
+  var_combo = c("icc_0.1", "icc_0.5", "icc_0.9") # maybe add ICC = 0.8?
 
 )
 
 
-batches <- 10
-total_reps <- 1500
+# batches <- 20
+# total_reps <- 1500
+
+batches <- 1
+total_reps <- 4
 
 lengths(design_factors)
 
@@ -103,7 +107,7 @@ params |> group_by(seed) |> tally()
 source_obj <- ls()
 
 # ----------------------------------------------------------------------
-batch_file <-  10
+batch_file <-  1
 params2 <- params %>% filter(batch == batch_file)
 params2$batch <- NULL
 
@@ -141,7 +145,7 @@ tm
 session_info <- sessionInfo()
 run_date <- date()
 
-FileName <- paste("sim/data/ICC_sim_results_",batch_file,".Rdata",sep="")
+FileName <- paste("data/ICC_sim_results_update", batch_file,".Rdata",sep="")
 
 save(tm, params2, results, session_info, run_date, file =  FileName)
 

@@ -1,12 +1,7 @@
 calc_performance <- function(results) {
   
-  # TO Do : 
-  # - add in MSE and corresponding MCSE
-  # - add MCSE or RMSE
-  
-  
   # performance criteria related to the ICC estimate
-  
+
   performance_measures <- 
     results |> 
     group_by(method, 
@@ -51,6 +46,7 @@ calc_performance <- function(results) {
 }
 
 # performance criteria related to the variance components
+
 calc_performance_var <- function(results) {
   
   performance_measures <- 

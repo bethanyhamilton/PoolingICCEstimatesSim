@@ -55,7 +55,6 @@ rve_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
                                 var_icc_name = var_icc_name,
                                 tau_est  = tau_est ,
                                 n_weighted = n, 
-                            
                                 all_converge = all_converge,
                                 num_no_cong_icc = num_no_cong_icc
     ))
@@ -103,6 +102,8 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     
     reml_fit <- metafor::rma.uni(yi = icc_value, vi = var_icc_est, data = icc_est_sample, method = "REML", test="knha") # test
     
+
+    
     n <-  mean(icc_est_sample$n_0, na.rm = TRUE)
     
     if(var_icc_name == "Fisher TF"){
@@ -116,8 +117,15 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     }
     
     
-    tau_est  = sqrt(reml_fit$tau2)
+    tau_est  <- sqrt(reml_fit$tau2)
     
+    
+    # extra that I may add in at some point
+    # weights <- 1 / (var_icc_est + tau_est)
+    # se_alt <- sqrt(1 / sum(weights))
+    # se_khna <- sqrt((1 / (length(weights) - 1)) * sum((weights * (icc_value - pooled_icc_est)^2) / sum(weights)))
+    # CI_k_lower <- pooled_icc_est - (qt(p = .025, df = (k - 1)) * se_khna)
+    # CI_k_upper <- pooled_icc_est + (qt(p = .025, df = (k - 1)) * se_khna)
     
     return(results = data.frame(method = "REML",
                                 pooled_icc_est = pooled_icc_est,
@@ -143,10 +151,6 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
   
   
 }
-
-
-
-
 
 
 
