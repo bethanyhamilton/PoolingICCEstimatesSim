@@ -71,7 +71,7 @@ run_sim <- function(iterations,
 
 # ----------------------------------------------------------------------
 
-set.seed(20250928) 
+set.seed(20251005) 
 
 
 
@@ -82,16 +82,16 @@ design_factors <- list(
   n_bar_prop = c(.1, .5),
   tau= c(.01,.02),
 #  var_combo = c("small_large", "medium_large", "large_large")
-  var_combo = c("icc_0.1", "icc_0.5", "icc_0.9") # maybe add ICC = 0.8?
+  var_combo = c("icc_0.9", "icc_0.5", "icc_0.1") # maybe add ICC = 0.8?
 
 )
 
 
-# batches <- 20
-# total_reps <- 1500
+batches <- 10
+total_reps <- 1500
 
-batches <- 1
-total_reps <- 4
+# batches <- 1
+# total_reps <- 4
 
 lengths(design_factors)
 
@@ -111,7 +111,7 @@ batch_file <-  1
 params2 <- params %>% filter(batch == batch_file)
 params2$batch <- NULL
 
-params2 <- params2 |> slice(1:1)
+# params2 <- params2 |> slice(1:1)
 
 library(future)
 library(furrr)

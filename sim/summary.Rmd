@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, message=FALSE}
+
 rm(list = ls())
 library(tidyverse)
 library(kableExtra)
@@ -46,7 +47,6 @@ results10 <- results
 results <- bind_rows(results1, results2, results3, results4, results5, results6, results7, results8, results9, results10)
 
 source("3_performance_crit.R")
-
 
 ```
 
@@ -196,7 +196,7 @@ perf_crit$icc_est_n_graph <- factor(perf_crit$icc_est_n_graph,levels=c(
 
 
 perf_crit  |>  
-  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
@@ -228,7 +228,7 @@ ggsave("RPB_numICC.png", width = 6.8, height = 5, units = "in")
 
 
 perf_crit  |>  
-  ggplot(aes(x = variance, y = RMSE_rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid( var_combo_graph ~ icc_est_n, 
@@ -261,7 +261,7 @@ ggsave("RMSE_numICC.png", width = 6.8, height = 5, units = "in")
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
@@ -290,7 +290,7 @@ ggsave("RPB_tau.png", width = 6.8, height = 5, units = "in")
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed") + 
   geom_boxplot(alpha = .5) + 
   facet_grid( var_combo_graph ~ tau, 
@@ -323,7 +323,7 @@ ggsave("RMSE_tau.png", width = 6.8, height = 5, units = "in")
 ```{r}
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
@@ -352,7 +352,7 @@ perf_crit  |>
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid( var_combo_graph ~ nj_size, 
@@ -387,7 +387,7 @@ perf_crit  |>
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
@@ -418,7 +418,7 @@ perf_crit  |>
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid( var_combo_graph ~ n_bar_size, 
@@ -456,7 +456,7 @@ perf_crit  |>
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
@@ -487,7 +487,7 @@ perf_crit  |>
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid( var_combo_graph ~ n_bar_prop, 
@@ -526,7 +526,7 @@ perf_crit  |>
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
@@ -554,7 +554,7 @@ perf_crit  |>
 
 
 
-perf_crit  |> ggplot(aes(x = variance, y = RMSE_rel_bias_icc, fill = model)) + 
+perf_crit  |> ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid( nj_size ~ n_bar_size, 
@@ -1085,11 +1085,5 @@ perf_crit2  |> ggplot(aes(x = var_combo_graph, y = rel_bias_clus)) +
       )
 
 ggsave("RPB_L2_j_mean.png", width = 6.8, height = 5, units = "in")
-
-
-
-
-
-
 
 ```
