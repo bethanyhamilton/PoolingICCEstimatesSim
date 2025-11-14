@@ -391,14 +391,14 @@ gen_icc_unbalanced <- function(icc_est_n,
 # 
 # 
 # 
-# tm4 <-
-#   system.time( ICC_test_dist <- gen_icc_unbalanced(
-#                   icc_est_n= 150,
-#                   nj_size = "small",
-#                   n_bar_size = "small",
-#                   n_bar_prop= .5,
-#                   var_combo= "small_large",
-#                   tau= .01))
+tm4 <-
+  system.time( ICC_test_dist <- gen_icc_unbalanced(
+                  icc_est_n= 150,
+                  nj_size = "small",
+                  n_bar_size = "small",
+                  n_bar_prop= .5,
+                  var_combo= "small_large",
+                  tau= .01))
 #   tm4 <-
 #     system.time(
 # ICC_test_dist_neg <- gen_icc_unbalanced(

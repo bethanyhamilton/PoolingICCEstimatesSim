@@ -103,7 +103,7 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     reml_fit <- metafor::rma.uni(yi = icc_value, vi = var_icc_est, data = icc_est_sample, method = "REML", test="knha") # test
     
 
-    
+    # assumption -- used the mean of the n_weighted across all of the primary studies. 
     n <-  mean(icc_est_sample$n_0, na.rm = TRUE)
     
     if(var_icc_name == "Fisher TF"){

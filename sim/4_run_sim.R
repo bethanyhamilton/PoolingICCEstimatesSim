@@ -7,9 +7,9 @@ library(metafor)
 library(robumeta)
 
 
-source("1_gen_sample_ICC.R")
-source("2_estimate_pooledICC.R")
-source("3_performance_crit.R")
+source("sim/1_gen_sample_ICC.R")
+source("sim/2_estimate_pooledICC.R")
+source("sim/3_performance_crit.R")
 
 
 # ----------------------------------------------------------------------
@@ -81,8 +81,8 @@ design_factors <- list(
   n_bar_size = c("small", "large"),
   n_bar_prop = c(.1, .5),
   tau= c(.01,.02),
-#  var_combo = c("small_large", "medium_large", "large_large")
-  var_combo = c("icc_0.9", "icc_0.5", "icc_0.1") # maybe add ICC = 0.8?
+  var_combo = c("small_large", "medium_large", "large_large", "icc_0.9", "icc_0.5", "icc_0.1")
+ # var_combo = c() # maybe add ICC = 0.8?
 
 )
 
@@ -107,7 +107,7 @@ params |> group_by(seed) |> tally()
 source_obj <- ls()
 
 # ----------------------------------------------------------------------
-batch_file <-  1
+batch_file <-  8
 params2 <- params %>% filter(batch == batch_file)
 params2$batch <- NULL
 
@@ -145,7 +145,7 @@ tm
 session_info <- sessionInfo()
 run_date <- date()
 
-FileName <- paste("data/ICC_sim_results_update", batch_file,".Rdata",sep="")
+FileName <- paste("sim/data/ICC_sim_results_update", batch_file,".Rdata",sep="")
 
 save(tm, params2, results, session_info, run_date, file =  FileName)
 
