@@ -122,9 +122,9 @@ params |> group_by(seed) |> tally()
 source_obj <- ls()
 
 # ----------------------------------------------------------------------
-# batch_file <-  8
+batch_file <-  8
 
-batch_file <-  1
+#batch_file <-  1
 params2 <- params %>% filter(batch == batch_file)
 params2$batch <- NULL
 

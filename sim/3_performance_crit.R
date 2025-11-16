@@ -33,13 +33,13 @@ calc_performance <- function(results) {
               bias_icc = mean(pooled_icc_est) - ICC_true,
               bias_icc_mcse = sqrt(variance / K),
               
+              # MSE
+              MSE = sum((pooled_icc_est - ICC_true)^2) / K,
+              
               # RMSE
-              RMSE = sqrt(sum((pooled_icc_est - ICC_true)^2) / K),
+              RMSE = sqrt(MSE),
               ## alt RMSE that is slightly rounded
               RMSE_rel_bias_icc = sqrt(var(pooled_icc_est) + bias_icc^2),
-              
-              #MSE
-              MSE = sum((pooled_icc_est - ICC_true)^2) / K,
               
               # RPB
               rel_bias_icc = (mean(pooled_icc_est) - ICC_true) / (ICC_true),

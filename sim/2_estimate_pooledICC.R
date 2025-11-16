@@ -111,7 +111,7 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
       
       pooled_icc_est = (exp(2*as.numeric(reml_fit$beta)) - 1)/(n - 1 + exp(2*as.numeric(reml_fit$beta)))
       
-    } else{
+    } else {
       
       pooled_icc_est = as.numeric(reml_fit$beta)
     }
@@ -131,6 +131,7 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     # reml_fit$ci.lb
     # reml_fit$ci.ub
     # reml_fit$QE
+    # reml_fit$QEp  # to look at power of the test
     # confint(reml_fit, type="PL")
     
     return(results = data.frame(method = "REML",
