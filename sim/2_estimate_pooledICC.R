@@ -122,7 +122,7 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     
     # extra that I may add in at some point:
     
-    # weights <- 1 / (var_icc_est + tau_est)
+    # weights <- 1 / (var_icc_est + tau_est^2)
     # se_alt <- sqrt(1 / sum(weights))
     # var_KH <- (1 / (length(weights) - 1)) * sum(weights * (icc_value - pooled_icc_est)^2)
     # se_khna <- sqrt(var_KH / sum(weights))
@@ -234,12 +234,25 @@ analysis <- function(icc_est_sample){
 #                    n_bar_prop= .5,
 #                    var_combo= "small_large",
 #                    tau= .01)
+# # 
+#  reml_est <- rma_estimation(ICC_test_dist, icc_value= icc_est, var_icc_est = var_hedges, var_icc_name = "Hedges")
+#  reml_fit <- metafor::rma.uni(yi =  icc_est, vi = var_hedges, data = ICC_test_dist, method = "REML", test="knha") # test
+# # 
+# # all.equal(as.numeric(reml_fit$beta), unlist(reml_est[[2]]))
+# # all.equal(as.numeric(reml_fit$se), unlist(reml_est[[3]]))
 # 
-# reml_est <- rma_estimation(ICC_test_dist, icc_value= icc_est, var_icc_est = var_hedges, var_icc_name = "Hedges")
-# reml_fit <- metafor::rma.uni(yi =  icc_est, vi = var_hedges, data = ICC_test_dist, method = "REML", test="knha") # test
 # 
-# all.equal(as.numeric(reml_fit$beta), unlist(reml_est[[2]]))
-# all.equal(as.numeric(reml_fit$se), unlist(reml_est[[3]]))
+# 
+# weights <- 1 / (ICC_test_dist$var_hedges + reml_fit$tau2)
+# se_alt <- sqrt(1 / sum(weights))
+# var_KH <- (1 / (length(weights) - 1)) * sum(weights * (ICC_test_dist$icc_est - reml_fit$beta)^2)
+# se_khna <- sqrt(var_KH / sum(weights))
+# CI_k_lower <- reml_fit$beta - (qt(p = .975, df = (length(weights) - 1)) * se_khna)
+# CI_k_upper <- reml_fit$beta + (qt(p = .975, df = (length(weights) - 1)) * se_khna)
+#  
+# all.equal(as.numeric(CI_k_lower), reml_fit$ci.lb)
+# all.equal(as.numeric(CI_k_upper), reml_fit$ci.b)
+
 # 
 # #
 #  rve_est <- rve_estimation(icc_est_sample = ICC_test_dist, icc_value = icc_est, var_icc_est = var_hedges, var_icc_name = "Hedges")

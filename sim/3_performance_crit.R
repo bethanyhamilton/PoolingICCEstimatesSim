@@ -17,7 +17,10 @@ calc_performance <- function(results) {
            l2_es = (clustervar_mean - l2_var) / clustervar_sd,
            se_ICC_true = ifelse(var_icc_name != "Fisher TF", sd(pooled_icc_est), NA),
            pooled_icc_est2 = ifelse(var_icc_name == "Fisher TF", .5 * log((1 + (n_weighted - 1) * pooled_icc_est) / (1 - pooled_icc_est)), NA),
-           se_ICC_true= ifelse(var_icc_name == "Fisher TF", sd(pooled_icc_est2), se_ICC_true)) |>
+           se_ICC_true= ifelse(var_icc_name == "Fisher TF", sd(pooled_icc_est2), se_ICC_true)#,
+         #  CI_lower = pooled_icc_est - (qt(p = .975, df = (icc_est_n - 1)) * se_pooled_icc_est),
+          # CI_upper = pooled_icc_est + (qt(p = .975, df = (icc_est_n - 1)) * se_pooled_icc_est),
+           ) |>
     summarize(
               # number of iterations
               K = n(),
@@ -56,6 +59,9 @@ calc_performance <- function(results) {
               
               # kurtosis
               kurtosis = (1/(K*variance^2))*sum((pooled_icc_est-mean(pooled_icc_est))^4),
+              
+              # coverage
+             # coverage = mean(CI_lower <= ICC_true & ICC_true <= CI_upper),
               
               .groups = 'drop')
   
