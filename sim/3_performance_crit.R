@@ -18,8 +18,10 @@ calc_performance <- function(results) {
            se_ICC_true = ifelse(var_icc_name != "Fisher TF", sd(pooled_icc_est), NA),
            pooled_icc_est2 = ifelse(var_icc_name == "Fisher TF", .5 * log((1 + (n_weighted - 1) * pooled_icc_est) / (1 - pooled_icc_est)), NA),
            se_ICC_true= ifelse(var_icc_name == "Fisher TF", sd(pooled_icc_est2), se_ICC_true)#,
-         #  CI_lower = pooled_icc_est - (qt(p = .975, df = (icc_est_n - 1)) * se_pooled_icc_est),
-          # CI_upper = pooled_icc_est + (qt(p = .975, df = (icc_est_n - 1)) * se_pooled_icc_est),
+           
+           ## need to break it down by model type -- can't get CI for RVE because I didn't save df...
+          # CI_lower = ifelse(method == "REML", pooled_icc_est - (qt(p = .975, df = (icc_est_n - 1)) * se_pooled_icc_est), NA),
+          # CI_upper = ifelse(method == "REML", pooled_icc_est + (qt(p = .975, df = (icc_est_n - 1)) * se_pooled_icc_est), NA)
            ) |>
     summarize(
               # number of iterations
