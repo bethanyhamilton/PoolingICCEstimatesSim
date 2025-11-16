@@ -259,11 +259,15 @@ analysis <- function(icc_est_sample){
 #  rve_fit <- robumeta::robu(formula = icc_est  ~ 1, studynum = study_id, var.eff.size = var_hedges, data = ICC_test_dist, small = TRUE)
 #  res.CA  <- rma(icc_est, var_hedges, method="HE", data=ICC_test_dist)
 #  res.CA2 <- rma(icc_est, var_hedges, method="GENQ", weights=1/(var_hedges + res.CA$tau2), data=ICC_test_dist)
+#  coef_RVE1 <-  metafor::robust(reml_fit, cluster = study_id, clubSandwich = TRUE)
+#  coef_RVE2 <-  metafor::robust(res.CA, cluster = study_id, clubSandwich = TRUE)
 # 
-# #
+# 
 #  all.equal(as.numeric(rve_fit$reg_table[2]), unlist(rve_est[[2]]))
 #  all.equal(as.numeric(rve_fit$reg_table[3]), unlist(rve_est[[3]]))
-#  all.equal(as.numeric(rve_fit$reg_table[2]), as.numeric(res.CA2$beta))
+  # all.equal(as.numeric(rve_fit$reg_table[2]), as.numeric(res.CA2$beta))
+  # all.equal(as.numeric(rve_fit$reg_table[2]), as.numeric(coef_RVE1$beta))
+  # all.equal(as.numeric(rve_fit$reg_table[2]), as.numeric(coef_RVE2$beta))
 #  
  #as.numeric(rve_fit$reg_table[2]) - (qt(p = .975, df = (30 - 1)) * as.numeric(rve_fit$reg_table[3]))
  #as.numeric(rve_fit$reg_table[2]) - (qt(p = .975, df = 23.5) * as.numeric(rve_fit$reg_table[3]))
