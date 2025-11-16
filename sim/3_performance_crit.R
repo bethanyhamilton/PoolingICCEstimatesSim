@@ -62,6 +62,7 @@ calc_performance <- function(results) {
               
               # coverage
              # coverage = mean(CI_lower <= ICC_true & ICC_true <= CI_upper),
+             # coverage_mcse = sqrt(coverage * (1 - coverage) / K),
               
               .groups = 'drop')
   
