@@ -1,4 +1,6 @@
-
+#-------------------------------------------------------------------------------
+# Estimation Functions for Pooling ICC Estimates
+#-------------------------------------------------------------------------------
  # library(metafor)
  # library(clubSandwich)
  # library(robumeta)
@@ -17,30 +19,29 @@ rve_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     if (!is.null(icc_est_sample)) {
       var_icc_est_call <- substitute(var_icc_est)
       icc_value_call <- substitute(icc_value)
-      
-      
+
+
       env <- list2env(icc_est_sample, parent = parent.frame())
-      
-      
+
+
       var_icc_est <- eval(var_icc_est_call, env)
       icc_value <- eval(icc_value_call, env)
-      
-      
+
+
     }
     
     
-    ##Number missing iccs
+    # Number missing iccs
     test2 <- with(icc_est_sample,!is.na(icc_value))
     all_converge <- all(test2)
     num_no_cong_icc = sum(test2==FALSE)
-    
     
     rve_fit_robu <- robumeta::robu(formula = icc_value  ~ 1, studynum = study_id, var.eff.size = var_icc_est, data = icc_est_sample, small = TRUE)
     n <-  mean(icc_est_sample$n_0, na.rm = TRUE)
     
     if(var_icc_name == "Fisher TF"){
       
-      pooled_icc_est = (exp(2* as.numeric(rve_fit_robu$reg_table[2])) -1 )/(n - 1 + exp(2* as.numeric(rve_fit_robu$reg_table[2])))
+      pooled_icc_est = (exp(2 *as.numeric(rve_fit_robu$reg_table[2])) - 1)/(n - 1 + exp(2*as.numeric(rve_fit_robu$reg_table[2])))
       
     } else {
       
@@ -53,7 +54,7 @@ rve_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
                                 pooled_icc_est = pooled_icc_est,
                                 se_pooled_icc_est = as.numeric(rve_fit_robu$reg_table[3]),
                                 var_icc_name = var_icc_name,
-                                tau_est  = tau_est ,
+                                tau_est  = tau_est,
                                 n_weighted = n, 
                                 all_converge = all_converge,
                                 num_no_cong_icc = num_no_cong_icc
@@ -84,18 +85,18 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     if (!is.null(icc_est_sample)) {
       var_icc_est_call <- substitute(var_icc_est)
       icc_value_call <- substitute(icc_value)
-      
+
       env <- list2env(icc_est_sample, parent = parent.frame())
-      
-      
+
+
       var_icc_est <- eval(var_icc_est_call, env)
       icc_value <- eval(icc_value_call, env)
-      
-      
+
+
     }
     
 
-    #Number missing iccs
+    # Number missing iccs
     test2 <- with(icc_est_sample,!is.na(icc_value))
     all_converge <- all(test2)
     num_no_cong_icc = sum(test2==FALSE)
@@ -108,10 +109,9 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     
     if(var_icc_name == "Fisher TF"){
       
+      pooled_icc_est = (exp(2*as.numeric(reml_fit$beta)) - 1)/(n - 1 + exp(2*as.numeric(reml_fit$beta)))
       
-      pooled_icc_est = (exp(2*as.numeric(reml_fit$beta)) -1 )/(n - 1 + exp(2*as.numeric(reml_fit$beta)))
-      
-    }else{
+    } else{
       
       pooled_icc_est = as.numeric(reml_fit$beta)
     }
@@ -120,26 +120,31 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     tau_est  <- sqrt(reml_fit$tau2)
     
     
-    # extra that I may add in at some point
+    # extra that I may add in at some point:
+    
     # weights <- 1 / (var_icc_est + tau_est)
     # se_alt <- sqrt(1 / sum(weights))
-    # se_khna <- sqrt((1 / (length(weights) - 1)) * sum((weights * (icc_value - pooled_icc_est)^2) / sum(weights)))
-    # CI_k_lower <- pooled_icc_est - (qt(p = .025, df = (k - 1)) * se_khna)
-    # CI_k_upper <- pooled_icc_est + (qt(p = .025, df = (k - 1)) * se_khna)
+    # var_KH <- (1 / (length(weights) - 1)) * sum(weights * (icc_value - pooled_icc_est)^2)
+    # se_khna <- sqrt(var_KH / sum(weights))
+    # CI_k_lower <- pooled_icc_est - (qt(p = .975, df = (k - 1)) * se_khna)
+    # CI_k_upper <- pooled_icc_est + (qt(p = .975, df = (k - 1)) * se_khna)
+    # reml_fit$ci.lb
+    # reml_fit$ci.ub
+    # reml_fit$QE
+    # confint(reml_fit, type="PL")
     
     return(results = data.frame(method = "REML",
                                 pooled_icc_est = pooled_icc_est,
                                 se_pooled_icc_est = as.numeric(reml_fit$se),
                                 var_icc_name = var_icc_name,
-                                tau_est  = tau_est ,
+                                tau_est  = tau_est,
                                 n_weighted = n, 
                                 all_converge = all_converge,
                                 num_no_cong_icc = num_no_cong_icc
                                 
     ))
     
-  }
-  , error = function(w) { return(result = data.frame(method = "REML",
+  }, error = function(w) { return(result = data.frame(method = "REML",
                                                      pooled_icc_est = NA,
                                                      se_pooled_icc_est = NA,
                                                      var_icc_name = var_icc_name,
@@ -235,12 +240,16 @@ analysis <- function(icc_est_sample){
 # all.equal(as.numeric(reml_fit$beta), unlist(reml_est[[2]]))
 # all.equal(as.numeric(reml_fit$se), unlist(reml_est[[3]]))
 # 
-# # 
+# #
 #  rve_est <- rve_estimation(icc_est_sample = ICC_test_dist, icc_value = icc_est, var_icc_est = var_hedges, var_icc_name = "Hedges")
 #  rve_fit <- robumeta::robu(formula = icc_est  ~ 1, studynum = study_id, var.eff.size = var_hedges, data = ICC_test_dist, small = TRUE)
-# # 
+#  res.CA  <- rma(icc_est, var_hedges, method="HE", data=ICC_test_dist)
+#  res.CA2 <- rma(icc_est, var_hedges, method="GENQ", weights=1/(var_hedges + res.CA$tau2), data=ICC_test_dist)
+#  
+# #
 #  all.equal(as.numeric(rve_fit$reg_table[2]), unlist(rve_est[[2]]))
 #  all.equal(as.numeric(rve_fit$reg_table[3]), unlist(rve_est[[3]]))
+#  all.equal(as.numeric(rve_fit$reg_table[3]), as.numeric(res.CA2$beta))
 
 #rve_estimation(ICC_test_dist, icc_value = icc_est,  var_icc_est = var_hedges, var_icc_name = "hedges")
 

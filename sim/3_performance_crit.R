@@ -1,7 +1,7 @@
+# performance criteria related to the ICC estimate
+
 calc_performance <- function(results) {
   
-  # performance criteria related to the ICC estimate
-
   performance_measures <- 
     results |> 
     group_by(method, 

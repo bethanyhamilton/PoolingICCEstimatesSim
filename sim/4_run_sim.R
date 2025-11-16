@@ -1,3 +1,4 @@
+rm(list=ls())
 library(dplyr)
 library(tidyr)
 library(lmeInfo)
@@ -36,7 +37,7 @@ run_sim <- function(iterations,
     rerun(iterations,{
       
       # generate data --------------------------------------------------------- 
-       dat <- gen_icc_unbalanced(icc_est_n= icc_est_n,
+       dat <- gen_icc_unbalanced(icc_est_n = icc_est_n,
                                  nj_size = nj_size,
                                  n_bar_size = n_bar_size,
                                  n_bar_prop = n_bar_prop,
@@ -87,6 +88,20 @@ design_factors <- list(
 )
 
 
+# design_factors <- list(
+#   icc_est_n = c(100),
+#   nj_size = c("large"),
+#   n_bar_size = c("large"),
+#   n_bar_prop = c(.5),
+#   tau= c(.02),
+#   var_combo = c("icc_0.1")
+#   # var_combo = c() # maybe add ICC = 0.8?
+#   
+# )
+# 
+# batches <- 1
+# total_reps <- 5
+
 batches <- 10
 total_reps <- 1500
 
@@ -107,7 +122,9 @@ params |> group_by(seed) |> tally()
 source_obj <- ls()
 
 # ----------------------------------------------------------------------
-batch_file <-  8
+# batch_file <-  8
+
+batch_file <-  1
 params2 <- params %>% filter(batch == batch_file)
 params2$batch <- NULL
 
@@ -122,7 +139,14 @@ run_date1
 
 options(error=recover)
 
-no_cores <- availableCores() - 1
+# Note: I used the following, but I should have put the number of physical cores (which was 8 for me in first run). 
+# availableCores() lists thread count
+
+# no_cores <- availableCores() - 1
+
+# The following is for the update
+no_cores <- 4 - 1
+
 
 plan("multisession", workers = no_cores) 
 

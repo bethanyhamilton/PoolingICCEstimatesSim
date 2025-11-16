@@ -1,3 +1,17 @@
+#-------------------------------------------------------------------------------
+# Generating Data Functions for Pooling ICC Estimates
+#
+# Note: This is older code originally written for my qualifying exams in 2021.
+# I have cleaned it up since then, but I kept most of the structure the same
+# because the data remained unchanged. This project was run over multiple years,
+# so different package versions and different machines were used for the second
+# run (2025). However, the design is simple enough that these differences should
+# not affect the results.
+#
+# By Bethany Hamilton Bhat
+#-------------------------------------------------------------------------------
+
+
 # library(nlme)
 # library(lmeInfo)
 # library(purrr)
@@ -16,7 +30,8 @@ gen_uncond_data <- function(nj,
   # ICC parameter
   icc_true <- l2_var / (l2_var + l1_var)
   
-  # between-study heterogeneity - assuming uniform dist.
+  # between-study heterogeneity - assuming uniform dist. Could alternatively used 
+  # beta dist. 
   lower <- (-2 * tau) 
   upper <- (2 * tau)
   u <-  runif(1, min = lower, max = upper)
@@ -94,7 +109,7 @@ est_icc <- function(uncond_data) {
   # ICC estimate
   icc_est <- clustervar / (clustervar + residvar)
   
-  # need var of clustervar for hedges ICC var formulae. use fisher information matrix.
+  # need var of clustervar for hedges ICC var formula. use fisher information matrix.
   I <- Fisher_info(model, type = "expected")
   v2 <- diag(solve(I))[1]
   v1 <- diag(solve(I))[2]
@@ -290,7 +305,8 @@ gen_icc_unbalanced <- function(icc_est_n,
   
 
   
-  # different conditions for level 1 and level 2 variances
+  # different conditions for level 1 and level 2 variances 
+  # (names are set up like this because I used to have a condition that had the variance components drastically smaller in scale)
   if(var_combo == "small_large") {
     
     # 0.05 ICC
@@ -308,6 +324,8 @@ gen_icc_unbalanced <- function(icc_est_n,
     # 0.25 ICC
     l1_var <- 75
     l2_var <- 25
+    
+    # Below I added more conditions in a second run (which is why the names are not consistent)
     
   } else if(var_combo == "icc_0.1") {
     
@@ -330,6 +348,7 @@ gen_icc_unbalanced <- function(icc_est_n,
   }
   
   icc_est <- replicate(icc_est_n, { 
+    
                          nj <- sample(n_min:n_max, 1, replace=TRUE)
                          n_bar <- sample(n_bar_min:n_bar_max, 1, replace=TRUE)
 
@@ -391,14 +410,14 @@ gen_icc_unbalanced <- function(icc_est_n,
 # 
 # 
 # 
-tm4 <-
-  system.time( ICC_test_dist <- gen_icc_unbalanced(
-                  icc_est_n= 150,
-                  nj_size = "small",
-                  n_bar_size = "small",
-                  n_bar_prop= .5,
-                  var_combo= "small_large",
-                  tau= .01))
+# tm4 <-
+#   system.time( ICC_test_dist <- gen_icc_unbalanced(
+#                   icc_est_n= 150,
+#                   nj_size = "small",
+#                   n_bar_size = "small",
+#                   n_bar_prop= .5,
+#                   var_combo= "small_large",
+#                   tau= .01))
 #   tm4 <-
 #     system.time(
 # ICC_test_dist_neg <- gen_icc_unbalanced(

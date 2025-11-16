@@ -1,7 +1,13 @@
+
 rm(list = ls())
+
+source("sim/3_performance_crit.R")
+
 library(tidyverse)
 library(kableExtra)
 library(ggplot2)
+
+# Load raw data
 
 load("sim/data/ICC_sim_results_1.Rdata")
 results1 <- results
@@ -40,20 +46,38 @@ results16 <- results
 load("sim/data/ICC_sim_results_update7.Rdata")
 results17 <- results
 
-results <- bind_rows(results1, results2, results3, results4, results5, results6, results7, results8, results9, results10, results11, results12, results13, results14, results15, results16, results17)
+results <- bind_rows(results1, results2, 
+                     results3, results4, 
+                     results5, results6, 
+                     results7, results8, 
+                     results9, results10, 
+                     results11, results12,
+                     results13, results14, 
+                     results15, results16,
+                     results17)
 
-rm(results1, results2, results3, results4, results5, results6, results7, results8, results9, results10, results11, results12, results13, results14, results15, results16, results17)
+rm(results1, results2, 
+   results3, results4, 
+   results5, results6, 
+   results7, results8, 
+   results9, results10, 
+   results11, results12, 
+   results13, results14, 
+   results15, results16, 
+   results17)
 
-source("sim/3_performance_crit.R")
+
 
 # convergence
+
 test <- results |>  
   filter(sample_conv == "no") |>  
   filter(all_converge == TRUE)
 #sum(is.na(results$pooled_icc_est))
 
 
-results |>  filter(is.na(pooled_icc_est)) |>  
+results |>  
+  filter(is.na(pooled_icc_est)) |>  
   group_by(nj_size) |>  
   tally() |> 
   knitr::kable() |>
@@ -61,8 +85,13 @@ results |>  filter(is.na(pooled_icc_est)) |>
 
 
 converge_sum <- results |>  
-  group_by(method, var_icc_name, icc_est_n, nj_size, 
-           n_bar_size, n_bar_prop, var_combo, tau)  |> 
+  group_by(method, 
+           var_icc_name, 
+           icc_est_n, 
+           nj_size, 
+           n_bar_size,
+           n_bar_prop, 
+           var_combo, tau)  |> 
   summarise(k = n(),
             num_no_converge = sum(is.na(pooled_icc_est)),
             num_converge = k - num_no_converge,
@@ -91,7 +120,13 @@ converge_sum |>
 
 
 results <- results |>  
-  group_by(method, var_icc_name, icc_est_n, nj_size, n_bar_prop, n_bar_size, tau, var_combo)  |> 
+  group_by(method, 
+           var_icc_name, 
+           icc_est_n, 
+           nj_size, 
+           n_bar_prop, 
+           n_bar_size, 
+           tau, var_combo)  |> 
   mutate(combination_id = cur_group_id()) |> 
   ungroup()
 
@@ -101,7 +136,11 @@ results <- results |>
 
 results |>  group_by(combination_id) |>  tally()
 
-results |> filter(sample_conv != "no") |> filter(all_converge == TRUE) |>  group_by(combination_id) |>  tally() |> filter(n < 1000)
+results |> filter(sample_conv != "no") |> 
+  filter(all_converge == TRUE) |>  
+  group_by(combination_id) |>  
+  tally() |> 
+  filter(n < 1000)
 
 
 results_all_converged <- results |>  
@@ -109,8 +148,6 @@ results_all_converged <- results |>
   filter(all_converge == TRUE) |>  
   group_by(combination_id) |>  
   slice(1:1000) #|> ungroup()
-
-
 
 
 
@@ -209,7 +246,8 @@ perf_crit$icc_est_n_graph <- factor(perf_crit$icc_est_n_graph,levels=c(
   "k =  50",
   "k =  100"))
 
-perf_crit$var_combo_graph_f <- factor(as.character(perf_crit$var_combo_graph), levels = c("0.9", "0.5", "0.25", "0.15", "0.1", "0.05"))
+perf_crit$var_combo_graph_f <- factor(as.character(perf_crit$var_combo_graph), 
+                                      levels = c("0.9", "0.5", "0.25", "0.15", "0.1", "0.05"))
 
 
 
@@ -253,7 +291,8 @@ perf_crit2$icc_est_n_graph <- factor(perf_crit2$icc_est_n_graph,levels=c(
   "k =  100"))
 
 
-perf_crit2$var_combo_graph_f <- factor(as.character(perf_crit2$var_combo_graph), levels = c("0.9", "0.5", "0.25", "0.15", "0.1", "0.05"))
+perf_crit2$var_combo_graph_f <- factor(as.character(perf_crit2$var_combo_graph), 
+                                       levels = c("0.9", "0.5", "0.25", "0.15", "0.1", "0.05"))
 
 
 
