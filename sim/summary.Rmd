@@ -1,6 +1,5 @@
 ---
 title:  "Meta-Analyzing ICC Estimates Graphs"
-author: "Bethany"
 output:
   html_document:
     number_sections: yes
@@ -27,6 +26,8 @@ library(ggplot2)
 load("data/results_pooled_est.RData")
 
 load("data/results_var_comp.RData")
+
+
 
 ```
 
@@ -118,6 +119,19 @@ table <- perf_crit  |>
 
 ```
 
+# MCSE
+
+```{r}
+max(perf_crit$bias_icc_mcse)
+
+
+
+max(perf_crit$rel_bias_icc_mcse)
+
+
+
+```
+
 
 
 # Pooled Estimate 
@@ -130,7 +144,7 @@ table <- perf_crit  |>
 
 
 perf_crit  |>  
-  ggplot(aes(x = variance, y = rel_bias_icc_median, fill = model)) +
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) +
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
@@ -197,7 +211,7 @@ ggsave("RPB_ratio_numICC.png", width = 6.8, height = 5, units = "in")
 
 
 perf_crit  |>  
-  ggplot(aes(x = variance, y = bias_icc_median, fill = model)) + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
    geom_hline(yintercept = 0, linetype = "solid", colour = "black")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid(var_combo_graph_f ~ icc_est_n, 
@@ -443,7 +457,7 @@ ggsave("RMSE_j.png", width = 6.8, height = 5, units = "in")
 
 perf_crit  |> 
   ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
-   geom_hline(yintercept = .05, linetype = "solid")  + 
+   geom_hline(yintercept = .05, linetype = "dashed")  + 
    geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid(var_combo_graph_f ~ n_bar_size, 
@@ -2382,9 +2396,12 @@ perf_crit_agg |> filter(var_combo_graph > 0.2) |> ggplot(aes( var_combo_graph, k
   theme_minimal()
 ```
 
-Other Graphs
 
-```{r}
+
+```{r, eval = F}
+
+#Other Graphs
+
 perf_crit |> 
   ggplot(aes(x = factor(var_combo_graph), y = skewness, color = factor(icc_est_n))) +
   geom_point(alpha = .5, position = position_jitter(width = .3)) + 

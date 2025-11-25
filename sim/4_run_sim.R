@@ -60,15 +60,7 @@ run_sim <- function(iterations,
   
 }
 
-# tm3 <- system.time(test <- run_sim(iterations = 1,
-#                 icc_est_n = 10,
-#                 nj_size = "small",
-#                 n_bar_size = "small",
-#                 n_bar_prop = .5,
-#                 var_combo = "icc_0.9",
-#                 tau = .01,
-#                # seed = 90870,
-#                 summarize_results = FALSE))
+
 
 # ----------------------------------------------------------------------
 
@@ -82,31 +74,14 @@ design_factors <- list(
   n_bar_size = c("small", "large"),
   n_bar_prop = c(.1, .5),
   tau= c(.01,.02),
-  var_combo = c("small_large", "medium_large", "large_large", "icc_0.9", "icc_0.5", "icc_0.1")
- # var_combo = c() # maybe add ICC = 0.8?
-
+#  var_combo = c("small_large", "medium_large", "large_large", "icc_0.9", "icc_0.5", "icc_0.1")
+var_combo = c("icc_0.9", "icc_0.5", "icc_0.1")
 )
 
-
-# design_factors <- list(
-#   icc_est_n = c(100),
-#   nj_size = c("large"),
-#   n_bar_size = c("large"),
-#   n_bar_prop = c(.5),
-#   tau= c(.02),
-#   var_combo = c("icc_0.1")
-#   # var_combo = c() # maybe add ICC = 0.8?
-#   
-# )
-# 
-# batches <- 1
-# total_reps <- 5
 
 batches <- 10
 total_reps <- 1500
 
-# batches <- 1
-# total_reps <- 4
 
 lengths(design_factors)
 
@@ -122,7 +97,7 @@ params |> group_by(seed) |> tally()
 source_obj <- ls()
 
 # ----------------------------------------------------------------------
-batch_file <-  8
+batch_file <-  10
 
 #batch_file <-  1
 params2 <- params %>% filter(batch == batch_file)
@@ -139,12 +114,6 @@ run_date1
 
 options(error=recover)
 
-# Note: I used the following, but I should have put the number of physical cores (which was 8 for me in first run). 
-# availableCores() lists thread count
-
-# no_cores <- availableCores() - 1
-
-# The following is for the update
 no_cores <- 4 - 1
 
 

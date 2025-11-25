@@ -132,7 +132,9 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     # reml_fit$ci.ub
     # reml_fit$QE
     # reml_fit$QEp  # to look at power of the test
-    # confint(reml_fit, type="PL")
+    # tau_sq_ci <- confint(reml_fit, type="PL")
+    # tau_sq_ci_lower <- tau_sq_ci$random[1,2]
+    # tau_sq_ci_upper <- tau_sq_ci$random[1,3]
     
     return(results = data.frame(method = "REML",
                                 pooled_icc_est = pooled_icc_est,
@@ -255,14 +257,18 @@ analysis <- function(icc_est_sample){
 
 # 
 # #
-#  rve_est <- rve_estimation(icc_est_sample = ICC_test_dist, icc_value = icc_est, var_icc_est = var_hedges, var_icc_name = "Hedges")
-#  rve_fit <- robumeta::robu(formula = icc_est  ~ 1, studynum = study_id, var.eff.size = var_hedges, data = ICC_test_dist, small = TRUE)
-#  res.CA  <- rma(icc_est, var_hedges, method="HE", data=ICC_test_dist)
-#  res.CA2 <- rma(icc_est, var_hedges, method="GENQ", weights=1/(var_hedges + res.CA$tau2), data=ICC_test_dist)
-#  coef_RVE1 <-  metafor::robust(reml_fit, cluster = study_id, clubSandwich = TRUE)
-#  coef_RVE2 <-  metafor::robust(res.CA, cluster = study_id, clubSandwich = TRUE)
-# 
-# 
+  # rve_est <- rve_estimation(icc_est_sample = ICC_test_dist, icc_value = icc_est, var_icc_est = var_hedges, var_icc_name = "Hedges")
+  # rve_fit <- robumeta::robu(formula = icc_est  ~ 1, studynum = study_id, var.eff.size = var_hedges, data = ICC_test_dist, small = TRUE)
+  # res.CA  <- rma(icc_est, var_hedges, method="HE", data=ICC_test_dist)
+  # res.CA2 <- rma(icc_est, var_hedges, method="GENQ", weights=1/(var_hedges + res.CA$tau2), data=ICC_test_dist)
+  # 
+  # rve_rma_ce <- rma.mv(icc_est, var_hedges, random = ~ icc_est | study_id,  method="MoM", struct="UN", data=ICC_test_dist)
+  # 
+  # coef_RVE1 <-  metafor::robust(reml_fit, cluster = study_id, clubSandwich = TRUE)
+  # 
+  # coef_RVE2 <-  metafor::robust(res.CA, cluster = study_id, clubSandwich = TRUE)
+#
+#
 #  all.equal(as.numeric(rve_fit$reg_table[2]), unlist(rve_est[[2]]))
 #  all.equal(as.numeric(rve_fit$reg_table[3]), unlist(rve_est[[3]]))
   # all.equal(as.numeric(rve_fit$reg_table[2]), as.numeric(res.CA2$beta))

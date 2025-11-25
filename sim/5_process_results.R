@@ -9,6 +9,8 @@ library(ggplot2)
 
 # Load raw data
 
+
+# First run
 load("sim/data/ICC_sim_results_1.Rdata")
 results1 <- results
 load("sim/data/ICC_sim_results_2.Rdata")
@@ -30,7 +32,7 @@ results9 <- results
 load("sim/data/ICC_sim_results_10.Rdata")
 results10 <- results
 
-
+# Update - with new conditions for var_combo
 load("sim/data/ICC_sim_results_update1.Rdata")
 results11 <- results
 load("sim/data/ICC_sim_results_update2.Rdata")
@@ -45,34 +47,64 @@ load("sim/data/ICC_sim_results_update6.Rdata")
 results16 <- results
 load("sim/data/ICC_sim_results_update7.Rdata")
 results17 <- results
+load("sim/data/ICC_sim_results_update8.Rdata")
+results18 <- results
+load("sim/data/ICC_sim_results_update9.Rdata")
+results19 <- results
+load("sim/data/ICC_sim_results_update10.Rdata")
+results20 <- results
 
-results <- bind_rows(results1, results2, 
-                     results3, results4, 
-                     results5, results6, 
-                     results7, results8, 
-                     results9, results10, 
-                     results11, results12,
-                     results13, results14, 
-                     results15, results16,
-                     results17)
+results <- bind_rows(results1, 
+                     results2, 
+                     results3, 
+                     results4, 
+                     results5, 
+                     results6, 
+                     results7, 
+                     results8, 
+                     results9, 
+                     results10, 
+                     results11,
+                     results12,
+                     results13, 
+                     results14, 
+                     results15, 
+                     results16,
+                     results17, 
+                     results18,
+                     results19, 
+                     results20)
 
-rm(results1, results2, 
-   results3, results4, 
-   results5, results6, 
-   results7, results8, 
-   results9, results10, 
-   results11, results12, 
-   results13, results14, 
-   results15, results16, 
-   results17)
+rm(
+  results1,
+  results2,
+  results3,
+  results4,
+  results5,
+  results6,
+  results7,
+  results8,
+  results9,
+  results10,
+  results11,
+  results12,
+  results13,
+  results14,
+  results15,
+  results16,
+  results17,
+  results18,
+  results19,
+  results20
+)
 
 
 
 # convergence
 
-test <- results |>  
-  filter(sample_conv == "no") |>  
-  filter(all_converge == TRUE)
+# test <- results |>  
+#   filter(sample_conv == "no") |>  
+#   filter(all_converge == TRUE)
 #sum(is.na(results$pooled_icc_est))
 
 
@@ -91,7 +123,8 @@ converge_sum <- results |>
            nj_size, 
            n_bar_size,
            n_bar_prop, 
-           var_combo, tau)  |> 
+           var_combo, 
+           tau)  |> 
   summarise(k = n(),
             num_no_converge = sum(is.na(pooled_icc_est)),
             num_converge = k - num_no_converge,
@@ -104,8 +137,9 @@ converge_sum <- results |>
 
 
 
-#min(converge_sum$converge_rate)
-#which(converge_sum$converge_rate < 100)
+min(converge_sum$converge_rate)
+converge_sum[which.min(converge_sum$converge_rate),]
+which(converge_sum$converge_rate < 100)
 
 
 # number of samples that did not converge per method.
@@ -126,7 +160,8 @@ results <- results |>
            nj_size, 
            n_bar_prop, 
            n_bar_size, 
-           tau, var_combo)  |> 
+           tau, 
+           var_combo)  |> 
   mutate(combination_id = cur_group_id()) |> 
   ungroup()
 
@@ -157,49 +192,49 @@ perf_crit <- calc_performance(results_all_converged)
 perf_crit2 <- calc_performance_var(results_all_converged)
 
 
-
 # add in labels for graphs
 
 ## raw converged results
 
-# results_all_converged <- results_all_converged |> 
-#   tidyr::unite("method2",  c(method, var_icc_name), remove = FALSE) |> 
-#   mutate(method2 = str_replace(method2, "_", "\n"))
-# 
-# results_all_converged <- results_all_converged  |>  mutate(
-#   var_combo_graph = case_when(
-#     var_combo == 'small_large' ~ 0.05,
-#     var_combo == 'icc_0.1' ~ 0.1,
-#     var_combo == 'medium_large' ~ 0.15,
-#     var_combo == 'large_large' ~ 0.25,
-#     var_combo == 'icc_0.5' ~ 0.5,
-#     var_combo == 'icc_0.9' ~ 0.9
-#   ),
-#   nj_size = case_when(
-#     nj_size == "small" ~'U[30, 50]',
-#     
-#     nj_size == "large" ~'U[50, 100]',
-#   ),
-#   n_bar_size = case_when(
-#     n_bar_size == "small" ~'U[10, 30]',
-#     
-#     n_bar_size == "large" ~'U[30, 50]',
-#   ),
-#   n_bar_graph = paste("n_bar_size = ", n_bar_size),
-#   nj_graph = paste("nj_size = ", nj_size),
-#   icc_est_n_graph = paste("k = ", icc_est_n)
-# ) |>  
-#   separate(method2, into = c("model", "variance"), sep = "\n", remove = FALSE 
-#   )  |>  
-#   mutate(variance = ifelse( variance == "Fisher TF", "Fisher\nTF", variance))
-# 
-# 
-# results_all_converged$icc_est_n_graph <- factor(results_all_converged$icc_est_n_graph,levels=c(
-#   "k =  20",
-#   "k =  50",
-#   "k =  100"))
+results_all_converged <- results_all_converged |>
+  tidyr::unite("method2",  c(method, var_icc_name), remove = FALSE) |>
+  mutate(method2 = str_replace(method2, "_", "\n"))
 
-## performance criteria of the pooled ICC
+results_all_converged <- results_all_converged  |>  mutate(
+  var_combo_graph = case_when(
+    var_combo == 'small_large' ~ 0.05,
+    var_combo == 'icc_0.1' ~ 0.1,
+    var_combo == 'medium_large' ~ 0.15,
+    var_combo == 'large_large' ~ 0.25,
+    var_combo == 'icc_0.5' ~ 0.5,
+    var_combo == 'icc_0.9' ~ 0.9
+  ),
+  nj_size = case_when(
+    nj_size == "small" ~'U[30, 50]',
+    
+    nj_size == "large" ~'U[50, 100]',
+  ),
+  n_bar_size = case_when(
+    n_bar_size == "small" ~'U[10, 30]',
+    
+    n_bar_size == "large" ~'U[30, 50]',
+  ),
+  n_bar_graph = paste("n_bar_size = ", n_bar_size),
+  nj_graph = paste("nj_size = ", nj_size),
+  icc_est_n_graph = paste("k = ", icc_est_n)
+) |>
+  separate(method2, into = c("model", "variance"), sep = "\n", remove = FALSE
+  )  |>
+  mutate(variance = ifelse( variance == "Fisher TF", "Fisher\nTF", variance))
+
+
+results_all_converged$icc_est_n_graph <- factor(results_all_converged$icc_est_n_graph,levels=c(
+  "k =  20",
+  "k =  50",
+  "k =  100"))
+
+
+## performance criteria for the pooled ICC estimate and corresponding SE
 
 perf_crit <- perf_crit |> 
   tidyr::unite("method2",  c(method, var_icc_name), remove = FALSE) |> 
@@ -298,7 +333,7 @@ perf_crit2$var_combo_graph_f <- factor(as.character(perf_crit2$var_combo_graph),
 
 # save results
 
-#save(results_all_converged, file = "sim/data/results_conv.RData")
+save(results_all_converged, file = "sim/data/results_conv.RData")
 
 save(perf_crit, file = "sim/data/results_pooled_est.RData")
 
