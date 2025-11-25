@@ -423,8 +423,7 @@ library(patchwork)
   mean_eng_graph <- nested_districts_eng |>
     select(-data) |>
     unnest(pooled) |>
-    ggplot(aes(y = pooled_icc_est, x = var_icc_name, group = var_icc_name, 
-               shape = method, color=var_icc_name)) +
+    ggplot(aes(y = pooled_icc_est, x = var_icc_name, group = var_icc_name)) +
     geom_point(aes(shape = method, color = var_icc_name)) + 
     geom_hline(data = means_eng, aes(yintercept = mean_icc), color="red", linetype="dashed" ) +
     facet_wrap(~grade,
