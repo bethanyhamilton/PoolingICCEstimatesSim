@@ -198,8 +198,6 @@ rve_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     return(results = tibble(method = "RVE",
                             pooled_icc_est = pooled_icc_est,
                             se_pooled_icc_est = as.numeric(rve_fit_robu$reg_table[3]),
-                            ci_lower = ci_lower,
-                            ci_upper = ci_upper,
                             var_icc_name = var_icc_name,
                             tau_est  = tau_est,
                             n_weighted = n_0
@@ -210,8 +208,6 @@ rve_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
   , error = function(w) { return(result = tibble(method = "RVE",
                                                      pooled_icc_est = NA,
                                                      se_pooled_icc_est = NA,
-                                                     ci_lower = NA,
-                                                     ci_upper = NA,
                                                      var_icc_name = var_icc_name,
                                                      tau_est  = NA,
                                                      n_weighted = NA
@@ -264,10 +260,6 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     return(results = tibble(method = "REML",
                                 pooled_icc_est = pooled_icc_est,
                                 se_pooled_icc_est = as.numeric(reml_fit$se),
-                                ci_lower = reml_fit$ci.lb,
-                                ci_upper = reml_fit$ci.ub,
-                                # Q_test = reml_fit$QE, 
-                                # Q_p = reml_fit$QEp,
                                 var_icc_name = var_icc_name,
                                 tau_est  = tau_est,
                                 n_weighted = n_0
@@ -277,8 +269,6 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
   }, error = function(w) { return(result = tibble(method = "REML",
                                                       pooled_icc_est = NA,
                                                       se_pooled_icc_est = NA,
-                                                      ci_lower = NA,
-                                                      ci_upper = NA,
                                                       var_icc_name = var_icc_name,
                                                       tau_est = NA,
                                                       n_weighted = NA 
@@ -433,16 +423,9 @@ library(patchwork)
   mean_eng_graph <- nested_districts_eng |>
     select(-data) |>
     unnest(pooled) |>
-    ggplot(aes(y = pooled_icc_est, x = var_icc_name, 
-               #group = var_icc_name, 
+    ggplot(aes(y = pooled_icc_est, x = var_icc_name, group = var_icc_name, 
                shape = method, color=var_icc_name)) +
-    geom_point(size = 2.5,
-                 position = position_dodge(width = 0.5)) + 
-    geom_errorbar(
-      aes(ymin = ci_lower, ymax = ci_upper),
-      width = 0.15,
-      position = position_dodge(width = 0.5)
-    ) +
+    geom_point(aes(shape = method, color = var_icc_name)) + 
     geom_hline(data = means_eng, aes(yintercept = mean_icc), color="red", linetype="dashed" ) +
     facet_wrap(~grade,
                labeller = labeller(grade = grade.labs))  +
