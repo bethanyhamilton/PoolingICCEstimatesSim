@@ -181,22 +181,28 @@ rve_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     
     if(var_icc_name == "Fisher TF"){
       
-      pooled_icc_est = (exp(2 *as.numeric(rve_fit_robu$reg_table[2])) - 1)/(n_0 - 1 + exp(2*as.numeric(rve_fit_robu$reg_table[2])))
+      pooled_icc_est = (exp(2*as.numeric(rve_fit_robu$reg_table[2])) - 1)/(n_0 - 1 + exp(2*as.numeric(rve_fit_robu$reg_table[2])))
+      ci_lower = (exp(2*as.numeric(rve_fit_robu$reg_table$CI.L)) - 1)/(n_0 - 1 + exp(2*as.numeric(rve_fit_robu$reg_table$CI.L)))
+      ci_upper = (exp(2*as.numeric(rve_fit_robu$reg_table$CI.U)) - 1)/(n_0 - 1 + exp(2*as.numeric(rve_fit_robu$reg_table$CI.U)))
       
     } else {
       
       pooled_icc_est =  as.numeric(rve_fit_robu$reg_table[2])
+      ci_lower = rve_fit_robu$reg_table$CI.L
+      ci_upper = rve_fit_robu$reg_table$CI.U  
+      
     }
     
     tau_est  = sqrt(rve_fit_robu$mod_info$tau.sq)
     
     return(results = tibble(method = "RVE",
-                                pooled_icc_est = pooled_icc_est,
-                                se_pooled_icc_est = as.numeric(rve_fit_robu$reg_table[3]),
-                                var_icc_name = var_icc_name,
-                              #  fit = rve_fit_robu,
-                                tau_est  = tau_est,
-                                n_weighted = n_0
+                            pooled_icc_est = pooled_icc_est,
+                            se_pooled_icc_est = as.numeric(rve_fit_robu$reg_table[3]),
+                            ci_lower = ci_lower,
+                            ci_upper = ci_upper,
+                            var_icc_name = var_icc_name,
+                            tau_est  = tau_est,
+                            n_weighted = n_0
     ))
     
     
@@ -204,6 +210,8 @@ rve_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
   , error = function(w) { return(result = tibble(method = "RVE",
                                                      pooled_icc_est = NA,
                                                      se_pooled_icc_est = NA,
+                                                     ci_lower = NA,
+                                                     ci_upper = NA,
                                                      var_icc_name = var_icc_name,
                                                      tau_est  = NA,
                                                      n_weighted = NA
@@ -253,30 +261,13 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
     tau_est  <- sqrt(reml_fit$tau2)
     
     
-    # extra that I may add in at some point:
-    
-    # weights <- 1 / (var_icc_est + tau_est^2)
-    # se_alt <- sqrt(1 / sum(weights))
-    # var_KH <- (1 / (length(weights) - 1)) * sum(weights * (icc_value - pooled_icc_est)^2)
-    # se_khna <- sqrt(var_KH / sum(weights))
-    # CI_k_lower <- pooled_icc_est - (qt(p = .975, df = (k - 1)) * se_khna)
-    # CI_k_upper <- pooled_icc_est + (qt(p = .975, df = (k - 1)) * se_khna)
-    # reml_fit$ci.lb
-    # reml_fit$ci.ub
-    # reml_fit$QE
-    # reml_fit$QEp  # to look at power of the test
-    # tau_sq_ci <- confint(reml_fit, type="PL")
-    # tau_sq_ci_lower <- tau_sq_ci$random[1,2]
-    # tau_sq_ci_upper <- tau_sq_ci$random[1,3]
-    
     return(results = tibble(method = "REML",
                                 pooled_icc_est = pooled_icc_est,
                                 se_pooled_icc_est = as.numeric(reml_fit$se),
-                                # CI_ICC_l = reml_fit$ci.lb,
-                                # CI_ICC_u = reml_fit$ci.ub,
+                                ci_lower = reml_fit$ci.lb,
+                                ci_upper = reml_fit$ci.ub,
                                 # Q_test = reml_fit$QE, 
                                 # Q_p = reml_fit$QEp,
-                                # fit = reml_fit, 
                                 var_icc_name = var_icc_name,
                                 tau_est  = tau_est,
                                 n_weighted = n_0
@@ -286,6 +277,8 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
   }, error = function(w) { return(result = tibble(method = "REML",
                                                       pooled_icc_est = NA,
                                                       se_pooled_icc_est = NA,
+                                                      ci_lower = NA,
+                                                      ci_upper = NA,
                                                       var_icc_name = var_icc_name,
                                                       tau_est = NA,
                                                       n_weighted = NA 
@@ -440,8 +433,16 @@ library(patchwork)
   mean_eng_graph <- nested_districts_eng |>
     select(-data) |>
     unnest(pooled) |>
-    ggplot(aes(y = pooled_icc_est, x = var_icc_name, group = var_icc_name)) +
-    geom_point(aes(shape = method, color=var_icc_name)) + 
+    ggplot(aes(y = pooled_icc_est, x = var_icc_name, 
+               #group = var_icc_name, 
+               shape = method, color=var_icc_name)) +
+    geom_point(size = 2.5,
+                 position = position_dodge(width = 0.5)) + 
+    geom_errorbar(
+      aes(ymin = ci_lower, ymax = ci_upper),
+      width = 0.15,
+      position = position_dodge(width = 0.5)
+    ) +
     geom_hline(data = means_eng, aes(yintercept = mean_icc), color="red", linetype="dashed" ) +
     facet_wrap(~grade,
                labeller = labeller(grade = grade.labs))  +
@@ -470,83 +471,4 @@ library(patchwork)
   ggsave("sim/demo/demo_results_pooledICC.png", width = 6.8, height = 5, units = "in")
   
   
-  # SE of pooled est
   
-  nested_districts_eng |>
-    select(-data) |>
-    unnest(pooled) |>
-    ggplot(aes(y = se_pooled_icc_est, x = var_icc_name, group= var_icc_name)) +
-    geom_point(aes(shape=method , color=var_icc_name)) + 
-    facet_wrap(~grade,
-               labeller = labeller(grade = grade.labs))  +
-    labs(shape = "Meta-Analytic Pooling Method", color = "Variance ICC", y = "SE estimate") + theme_bw()+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) 
-  
-  
-  nested_districts_math |>
-    select(-data) |>
-    unnest(pooled) |>
-    ggplot(aes(y = se_pooled_icc_est, x = var_icc_name, group= var_icc_name)) +
-    geom_point(aes(shape=method , color=var_icc_name)) + 
-    facet_wrap(~grade,
-               labeller = labeller(grade = grade.labs))  +
-    labs(shape = "Meta-Analytic Pooling Method", color = "Variance ICC", y = "SE estimate") + theme_bw()+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) 
-  
-  
-  # Tau is high
-  nested_districts_eng |>
-    select(-data) |>
-    unnest(pooled) |>
-    ggplot(aes(y = tau_est, x = var_icc_name, group = var_icc_name)) +
-    geom_point(aes(shape=method , color=var_icc_name)) + 
-    facet_wrap(~grade,
-               labeller = labeller(grade = grade.labs))  +
-    labs(shape = "Meta-Analytic Pooling Method", color = "Variance ICC", y = "Tau estimate") + theme_bw()+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) 
-  
-  
-  nested_districts_math |>
-    select(-data) |>
-    unnest(pooled) |>
-    ggplot(aes(y = tau_est, x = var_icc_name, group = var_icc_name)) +
-    geom_point(aes(shape=method , color=var_icc_name)) + 
-    facet_wrap(~grade,
-               labeller = labeller(grade = grade.labs))  +
-    labs(shape = "Meta-Analytic Pooling Method", color = "Variance ICC", y = "Tau estimate") + theme_bw()+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) 
-  
-  #ggsave("sim/demo/demo_results_tau.png", width = 6.8, height = 5, units = "in")
-  
-  nested_districts_eng |>
-    select(-data) |>
-    unnest(pooled) |>
-    group_by(var_icc_name, method) |>
-    summarise(min_tau = min(tau_est),
-              max_tau = max(tau_est),
-              median_tau = median(tau_est),
-              mean_tau = mean(tau_est))
-  
-  
-  nested_districts_math |>
-    select(-data) |>
-    unnest(pooled) |>
-    group_by(var_icc_name, method) |>
-    summarise(min_tau = min(tau_est),
-              max_tau = max(tau_est),
-              median_tau = median(tau_est),
-              mean_tau = mean(tau_est))
-  
-  
-    
-
-                                                                                
-                                                                                
