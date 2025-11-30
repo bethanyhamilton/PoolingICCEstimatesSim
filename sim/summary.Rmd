@@ -23,171 +23,105 @@ library(tidyverse)
 library(kableExtra)
 library(ggplot2)
 
-load("data/ICC_sim_results_1.Rdata")
-results1 <- results
-load("data/ICC_sim_results_2.Rdata")
-results2 <- results
-load("data/ICC_sim_results_3.Rdata")
-results3 <- results
-load("data/ICC_sim_results_4.Rdata")
-results4 <- results
-load("data/ICC_sim_results_5.Rdata")
-results5 <- results
-load("data/ICC_sim_results_6.Rdata")
-results6 <- results
-load("data/ICC_sim_results_7.Rdata")
-results7 <- results
-load("data/ICC_sim_results_8.Rdata")
-results8 <- results
-load("data/ICC_sim_results_9.Rdata")
-results9 <- results
-load("data/ICC_sim_results_10.Rdata")
-results10 <- results
 
-results <- bind_rows(results1, results2, results3, results4, results5, results6, results7, results8, results9, results10)
+load("data/results_pooled_est.RData")
 
-source("3_performance_crit.R")
+load("data/results_var_comp.RData")
 
 ```
 
-
-# Convergence
+# Table
 
 ```{r}
 
+table <- perf_crit  |>
+  group_by(model, variance, var_combo_graph) |>
+  summarize(
+    mean_pb = mean(bias_icc),
+    var_pb = var(bias_icc),
+    min_pb = min(bias_icc),
+    max_pb = max(bias_icc),
+    
+    # mean_pb_mcse = mean(bias_icc_mcse),
+    # var_pb_mcse = var(bias_icc_mcse),
+    # min_pb_mcse = min(bias_icc_mcse),
+    # max_pb_mcse = max(bias_icc_mcse),
+    
+    
+    mean_rpb = mean(rel_bias_icc),
+    var_rpb = sd(rel_bias_icc),
+    min_rpb = min(rel_bias_icc),
+    max_rpb = max(rel_bias_icc),
+    
+    mean_rmse = mean(RMSE),
+    var_rmse = sd(RMSE),
+    min_rmse = min(RMSE),
+    max_rmse = max(RMSE),
+    
+    mean_mse = mean(MSE),
+    var_mse = sd(MSE),
+    min_mse = min(MSE),
+    max_mse = max(MSE),
+    
+    mean_rseb = mean(rel_bias_se_ICC),
+    var_rseb = sd(rel_bias_se_ICC),
+    min_rseb = min(rel_bias_se_ICC),
+    max_rseb = max(rel_bias_se_ICC),
+    
+    # mean_rpb_mcse = mean(rel_bias_icc_mcse),
+    # var_rpb_mcse = var(rel_bias_icc_mcse),
+    # min_rpb_mcse = min(rel_bias_icc_mcse),
+    # max_rpb_mcse = max(rel_bias_icc_mcse
+    .groups = "drop"
+  ) |>
+  arrange(var_combo_graph) |>
+  rename(
+    Estimation = model,
+    "Variance Formulae" = variance,
+    "ICC Parameter" = var_combo_graph,
+    "Parameter Bias - mean" = mean_pb,
+    "Parameter Bias - variance" = var_pb,
+    "Parameter Bias - min." = min_pb,
+    "Parameter Bias - max" = max_pb,
+    "Relative Parameter Bias - mean" = mean_rpb,
+    "Relative Parameter Bias - variance" = var_rpb,
+    "Relative Parameter Bias - min." = min_rpb,
+    "Relative Parameter Bias - max" = max_rpb,
+    "Root Mean Squared Error - mean" = mean_rmse,
+    "Root Mean Squared Error - variance" = var_rmse,
+    "Root Mean Squared Error - min." = min_rmse,
+    "Root Mean Squared Error - max" = max_rmse,
+    "Mean Squared Error - mean" = mean_mse,
+    "Mean Squared Error - variance" = var_mse,
+    "Mean Squared Error - min." = min_mse,
+    "Mean Squared Error - max" = max_mse,
+    "Relative Standard Error Bias - mean" = mean_rseb,
+    "Relative Standard Error Bias - variance" = var_rseb,
+    "Relative Standard Error Bias - min." = min_rseb,
+    "Relative Standard Error Bias - max" = max_rseb#,
+    
+    #
+    # mean_rpb_ratio = mean(rel_bias_icc_alt),
+    # min_rpb_ratio = min(rel_bias_icc_alt),
+    # max_rpb_ratio = max(rel_bias_icc_alt),
+    # sd_rpb_ratio = sd(rel_bias_icc_alt)
+    
+  )
 
-test <- results |>  
-  filter(sample_conv == "no") |>  
-  filter(all_converge == TRUE)
-#sum(is.na(results$pooled_icc_est))
-
-
-results |>  filter(is.na(pooled_icc_est)) |>  
-  group_by(nj_size) |>  
-  tally() |> 
-  knitr::kable() |>
-  kableExtra::kable_styling() 
-
-
-converge_sum <- results |>  
-  group_by(method, var_icc_name, icc_est_n, nj_size, 
-           n_bar_size, n_bar_prop, var_combo, tau)  |> 
-  summarise(k = n(),
-            num_no_converge = sum(is.na(pooled_icc_est)),
-            num_converge = k - num_no_converge,
-            num_converge2 = sum(!is.na(pooled_icc_est)),
-            converge_rate = (num_converge/k)*100,
-            nonconverge_rate = (num_no_converge/k)*100, 
-            .groups = "drop"
-            ) |>  
-  ungroup()
-
-
-
-#min(converge_sum$converge_rate)
-#which(converge_sum$converge_rate < 100)
-
-
-# number of samples that did not converge per method.
-converge_sum |>
-  group_by(method, var_icc_name) |>
-  summarise(total_non_convergence = sum(num_no_converge, na.rm = TRUE),
-            total_converged = sum(num_converge, na.rm= TRUE),
-            converge_rate = (total_converged/(total_non_convergence + total_converged))*100, .groups = "drop" ) |>
-  ungroup() |> 
-  knitr::kable(digits = 3) |>
-  kableExtra::kable_styling() 
-
-
-
-
-
-```
-
-
-
-Retain only 1000 samples per condition.
-
-```{r}
-
-
-results <- results |>  
-  group_by(method, var_icc_name, icc_est_n, nj_size, n_bar_prop, n_bar_size, tau, var_combo)  |> 
-  mutate(combination_id = cur_group_id()) |> 
-  ungroup()
-
-
-
-#results |>  group_by(combination_id) |>  tally()
-
-#results |> filter(sample_conv != "no") |> filter(all_converge == TRUE) |>  group_by(combination_id) |>  tally()
-
-results_all_converged <- results |>  
-  filter(sample_conv != "no") |>  
-  filter(all_converge == TRUE) |>  
-  group_by(combination_id) |>  
-  slice(1:1000) |> ungroup()
-
-
-# calculate performance criteria
-perf_crit <- calc_performance(results_all_converged)
-
-perf_crit <- perf_crit |> 
-  tidyr::unite("method2",  c( method, var_icc_name), remove = FALSE) |> 
-  mutate(method2 = str_replace(method2, "_", "\n"))
-
-
-
-perf_crit2 <- calc_performance_var(results_all_converged)
-
-
-
+  write.csv(table, file = "perform_crit_summary.csv")
+  
+  table |> 
+   kbl() |>
+   kable_styling() |> 
+   scroll_box(width = "900px", height = "500px")
+  
 
 ```
 
-
-
-```{r}
-
-perf_crit$var_combo_graph <- factor(perf_crit$var_combo,labels=c(
-  'small_large' = 0.05,
-  'medium_large' = 0.15,
-  'large_large' = 0.25)) 
-
-perf_crit <- perf_crit  |>  mutate(
-  var_combo_graph = case_when(
-    var_combo == 'small_large' ~ 0.05,
-    var_combo == 'medium_large' ~ 0.15,
-    var_combo == 'large_large' ~ 0.25,
-  ),
-  nj_size = case_when(
-    nj_size == "small" ~'U[30, 50]',
-
-    nj_size == "large" ~'U[50, 100]',
-  ),
-    n_bar_size = case_when(
-    n_bar_size == "small" ~'U[10, 30]',
-
-    n_bar_size == "large" ~'U[30, 50]',
-  ),
-  n_bar_graph = paste("n_bar_size = ", n_bar_size), 
-  nj_graph = paste("nj_size = ", nj_size), 
-  icc_est_n_graph = paste("k = ", icc_est_n)
-) |>  
-  separate(method2, into = c("model", "variance"), sep = "\n", remove = FALSE 
-)  |>  
-  mutate(variance = ifelse( variance == "Fisher TF", "Fisher\nTF", variance))
-
-
-perf_crit$icc_est_n_graph <- factor(perf_crit$icc_est_n_graph,levels=c(
-  "k =  20",
-  "k =  50",
-  "k =  100"))
-
-```
 
 
 # Pooled Estimate 
+
 
 ## Interactions
 
@@ -196,26 +130,24 @@ perf_crit$icc_est_n_graph <- factor(perf_crit$icc_est_n_graph,levels=c(
 
 
 perf_crit  |>  
-  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = rel_bias_icc_median, fill = model)) +
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ icc_est_n, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols = k ==.(icc_est_n))) + 
+  facet_grid(var_combo_graph_f ~ icc_est_n, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = k ==.(icc_est_n))) + 
   labs(x = NULL, y = "RPB", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
@@ -223,95 +155,197 @@ perf_crit  |>
 ggsave("RPB_numICC.png", width = 6.8, height = 5, units = "in")
 
 
+```
 
 
+```{r, eval = F}
 
 
 perf_crit  |>  
-  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
-  geom_hline(yintercept = .00, linetype = "dashed")  + 
+  ggplot(aes(x = variance, y = rel_bias_icc_alt, fill = model)) + 
+   geom_hline(yintercept = 1, linetype = "solid")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ icc_est_n, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid(var_combo_graph_f ~ icc_est_n, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = k ==.(icc_est_n))) + 
-  labs(x = NULL, y = "RMSE", fill = NULL) + 
+  labs(x = NULL, y = "RPB - ratio", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+ggsave("RPB_ratio_numICC.png", width = 6.8, height = 5, units = "in")
+
+
+```
+
+
+```{r}
+
+# perf_crit_MCSE <- perf_crit |> 
+#   group_by(var_combo_graph, icc_est_n) |>  
+#   summarise(mcse = max(bias_icc_mcse))
+
+
+perf_crit  |>  
+  ggplot(aes(x = variance, y = bias_icc_median, fill = model)) + 
+   geom_hline(yintercept = 0, linetype = "solid", colour = "black")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(var_combo_graph_f ~ icc_est_n, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                     cols = k ==.(icc_est_n))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+ggsave("PB_numICC.png", width = 6.8, height = 5, units = "in")
+
+
+# ggplot(perf_crit, aes(var_combo_graph_f, bias_icc, col=model ) ) +
+#   facet_grid(variance ~ icc_est_n, 
+#              labeller = label_bquote(rows = .(variance), 
+#                                             cols = k ==.(icc_est_n))) +
+#   geom_point( alpha=0.10,
+#               position = position_dodge(width = 0.04) ) +
+#   geom_smooth( se=FALSE ) + 
+#   geom_hline( yintercept = 0 ) +
+#   theme_minimal()
+
+
+# ggplot(perf_crit, aes(var_combo_graph_f, bias_icc, col=skewness ) ) +
+#   facet_grid(variance ~ icc_est_n, 
+#              labeller = label_bquote(rows = .(variance), 
+#                                             cols = k ==.(icc_est_n))) +
+#   geom_point( alpha=0.10,
+#               position = position_dodge(width = 0.04) ) +
+#   geom_smooth( se=FALSE ) + 
+#   geom_hline( yintercept = 0 ) +
+#   theme_minimal()
+
+
+perf_crit  |>  
+  ggplot(aes(x = variance, y = RMSE, fill = model)) + 
+  geom_hline(yintercept = .00, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(var_combo_graph_f ~ icc_est_n, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                            cols = k ==.(icc_est_n))) + 
+  labs(x = NULL, y = "RMSE", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
 ggsave("RMSE_numICC.png", width = 6.8, height = 5, units = "in")
+
 ```
 
 ### True ICC vs tau (between study heterogeneity)
 
 ```{r}
 
-
-
 perf_crit  |> 
-  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
-  geom_hline(yintercept = .05, linetype = "dashed")  + 
-  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+   geom_hline(yintercept = .05, linetype = "dashed")  + 
+   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ tau, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid(var_combo_graph_f ~ tau, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = tau==.(tau))) + 
   labs(x = NULL, y = "RPB", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
 ggsave("RPB_tau.png", width = 6.8, height = 5, units = "in")
 
-
-
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
-  geom_hline(yintercept = .00, linetype = "dashed") + 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+   geom_hline(yintercept = 0, linetype = "solid")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ tau, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid(var_combo_graph_f ~ tau, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = tau==.(tau))) + 
-  labs(x = NULL, y = "RMSE", fill = NULL) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
+
+ggsave("PB_tau.png", width = 6.8, height = 5, units = "in")
+
+
+
+perf_crit  |> 
+  ggplot(aes(x = variance, y = RMSE, fill = model)) + 
+  geom_hline(yintercept = .00, linetype = "dashed") + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(var_combo_graph_f ~ tau, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                            cols = tau==.(tau))) + 
+  labs(x = NULL, y = "RMSE", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
 ggsave("RMSE_tau.png", width = 6.8, height = 5, units = "in")
 
 
@@ -322,59 +356,82 @@ ggsave("RMSE_tau.png", width = 6.8, height = 5, units = "in")
 
 ```{r}
 
+
 perf_crit  |> 
-  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
-  geom_hline(yintercept = .05, linetype = "dashed")  + 
-  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+   geom_hline(yintercept = .05, linetype = "dashed")  + 
+   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ nj_size, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols = j== .(nj_size))) + 
+  facet_grid(var_combo_graph_f ~ nj_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                     cols = j== .(nj_size))) + 
   labs(x = NULL, y = "RPB", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RPB_j.png", width = 6.8, height = 5, units = "in")
+ggsave("RPB_j.png", width = 6.8, height = 5, units = "in")
 
+perf_crit  |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+   geom_hline(yintercept = 0, linetype = "solid")  + 
+  # geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid( var_combo_graph_f ~ nj_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                     cols = j== .(nj_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+ggsave("PB_j.png", width = 6.8, height = 5, units = "in")
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ nj_size, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols = j== .(nj_size))) + 
+  facet_grid(var_combo_graph_f ~ nj_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                     cols = j== .(nj_size))) + 
   labs(x = NULL, y = "RMSE", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
-#ggsave("RMSE_j.png", width = 6.8, height = 5, units = "in")
+
+ggsave("RMSE_j.png", width = 6.8, height = 5, units = "in")
 
 
 
@@ -384,154 +441,339 @@ perf_crit  |>
 
 ```{r}
 
+perf_crit  |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+   geom_hline(yintercept = .05, linetype = "solid")  + 
+   geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(var_combo_graph_f ~ n_bar_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
 
+ggsave("RPB_nj.png", width = 6.8, height = 5, units = "in")
 
 perf_crit  |> 
   ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
-  geom_hline(yintercept = .05, linetype = "dashed")  + 
-  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+   geom_hline(yintercept = 0, linetype = "solid")  + 
+  # geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ n_bar_size, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols = bar(n_j)==.(n_bar_size))) + 
-  labs(x = NULL, y = "RPB", fill = NULL) + 
+  facet_grid(var_combo_graph_f ~ n_bar_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RPB_nj.png", width = 6.8, height = 5, units = "in")
-
-
-
+ggsave("PB_nj.png", width = 6.8, height = 5, units = "in")
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ n_bar_size, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols = bar(n_j)==.(n_bar_size))) + 
+  facet_grid(var_combo_graph_f ~ n_bar_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = bar(n_j)==.(n_bar_size))) + 
   labs(x = NULL, y = "RMSE", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RMSE_nj.png", width = 6.8, height = 5, units = "in")
+ggsave("RMSE_nj.png", width = 6.8, height = 5, units = "in")
 
  
-
-
 ```
-
 
 ### True ICC vs Degree of unbalance
 
 ```{r}
 
-
-
 perf_crit  |> 
-  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
-  geom_hline(yintercept = .05, linetype = "dashed")  + 
-  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+   geom_hline(yintercept = .05, linetype = "dashed")  + 
+   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ n_bar_prop, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols = zeta ==.(n_bar_prop))) + 
+  facet_grid(var_combo_graph_f ~ n_bar_prop, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = zeta ==.(n_bar_prop))) + 
   labs(x = NULL, y = "RPB", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
 #ggsave("RPB_n_bar_prop.png", width = 6.8, height = 5, units = "in")
 
+perf_crit  |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  # geom_hline(yintercept = .05, linetype = "dashed")  + 
+  # geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid( var_combo_graph_f ~ n_bar_prop, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = zeta ==.(n_bar_prop))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(
+    legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
 
-
+#ggsave("PB_n_bar_prop.png", width = 6.8, height = 5, units = "in")
 
 
 perf_crit  |> 
-  ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = RMSE, fill = model)) + 
   geom_hline(yintercept = .00, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ n_bar_prop, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols =zeta ==.(n_bar_prop))) + 
+  facet_grid( var_combo_graph_f ~ n_bar_prop, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols =zeta ==.(n_bar_prop))) + 
   labs(x = NULL, y = "RMSE", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
 #ggsave("RMSE_n_bar_prop.png", width = 6.8, height = 5, units = "in")
 
- 
-
-
 ```
 
 
 ### number clusters vs cluster size
 
+This is how the variance formulae perform across all generating ICC values. 
+
+
 ```{r}
 
-
-
-
 perf_crit  |> 
-  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( nj_size ~ n_bar_size, 
+  facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size), 
+                                     cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+#ggsave("RPB_j_nj.png", width = 6.8, height = 5, units = "in")
+
+perf_crit  |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size), 
+                                     cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+#ggsave("PB_j_nj.png", width = 6.8, height = 5, units = "in")
+
+perf_crit  |> ggplot(aes(x = variance, y = RMSE, fill = model)) + 
+  geom_hline(yintercept = .00, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size), 
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RMSE", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+#ggsave("RMSE_j_nj.png", width = 6.8, height = 5, units = "in")
+
+
+```
+
+
+```{r}
+
+perf_crit  |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = nj_size)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(var_combo_graph_f ~ n_bar_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                     cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+ggsave("RPB_j_nj_nomodel.png", width = 6.8, height = 5, units = "in")
+
+perf_crit  |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = nj_size)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(var_combo_graph_f ~ n_bar_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+                                     cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+ggsave("PB_j_nj_nomodel.png", width = 6.8, height = 5, units = "in")
+
+perf_crit  |> ggplot(aes(x = variance, y = RMSE, fill = nj_size)) + 
+  geom_hline(yintercept = .00, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(var_combo_graph_f ~ n_bar_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RMSE", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+#ggsave("RMSE_j_nj.png", width = 6.8, height = 5, units = "in")
+
+```
+
+
+
+
+```{r}
+perf_crit  |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
                                             cols = bar(n_j)==.(n_bar_size))) + 
   labs(x = NULL, y = "RPB", fill = NULL) + 
   theme_bw() +
@@ -545,22 +787,50 @@ perf_crit  |>
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RPB_j_nj.png", width = 6.8, height = 5, units = "in")
 
-
-
-perf_crit  |> ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) + 
-  geom_hline(yintercept = .00, linetype = "dashed")  + 
+perf_crit  |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( nj_size ~ n_bar_size, 
-             labeller = label_bquote(rows = j ==.(nj_size), 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
                                             cols = bar(n_j)==.(n_bar_size))) + 
-  labs(x = NULL, y = "RMSE", fill = NULL) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+```
+
+filtered $\rho = 0.50$
+
+
+```{r}
+
+perf_crit  |> filter(var_combo_graph == 0.50) |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size),
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
@@ -572,17 +842,283 @@ perf_crit  |> ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) +
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RMSE_j_nj.png", width = 6.8, height = 5, units = "in")
+perf_crit  |> filter(var_combo_graph == 0.50) |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size),
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
 
-# 
+perf_crit  |> filter(var_combo_graph == 0.50) |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop),
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
 
+
+perf_crit  |> filter(var_combo_graph == 0.50) |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
 
 ```
+
+filtered $\rho = 0.90$
+
+```{r}
+
+perf_crit  |> filter(var_combo_graph == 0.90) |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size),
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(
+    legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+perf_crit  |> filter(var_combo_graph == 0.90) |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size),
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+
+
+perf_crit  |> filter(var_combo_graph == 0.90) |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+
+perf_crit  |> filter(var_combo_graph == 0.90) |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+```
+
+filtered $\rho = 0.05$
+
+```{r}
+
+perf_crit  |> filter(var_combo_graph == 0.05) |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = model)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size),
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(
+    legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+perf_crit  |> filter(var_combo_graph == 0.05) |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = model)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(nj_size ~ n_bar_size, 
+             labeller = label_bquote(rows = j ==.(nj_size),
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+
+
+perf_crit  |> filter(var_combo_graph == 0.05) |> 
+  ggplot(aes(x = variance, y = rel_bias_icc, fill = nj_size)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "RPB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+
+perf_crit  |> filter(var_combo_graph == 0.05) |> 
+  ggplot(aes(x = variance, y = bias_icc, fill = nj_size)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(n_bar_prop ~ n_bar_size, 
+             labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
+                                            cols = bar(n_j)==.(n_bar_size))) + 
+  labs(x = NULL, y = "PB", fill = NULL) + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+        plot.caption=element_text(hjust = 0, size = 6),
+       # legend.title=element_text(size = 6), 
+        legend.text=element_text(size = 6.5),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       # strip.background =element_rect(fill="white")
+        strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+```
+
 
 
 # SE of ICC
@@ -591,35 +1127,32 @@ perf_crit  |> ggplot(aes(x = variance, y = RMSE_bias_icc, fill = model)) +
 
 ### True ICC vs num pooled ICCs
 
+
 ```{r}
 
 perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ icc_est_n, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
-                                            cols = k ==.(icc_est_n))) + 
+  facet_grid(var_combo_graph_f ~ icc_est_n, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
+                                     cols = k ==.(icc_est_n))) + 
   labs(x = NULL, y = "RSEB", fill = NULL) + 
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-ggsave("RPB_se_numICC.png", width = 6.8, height = 5, units = "in")
-
-
+ggsave("RSEB_numICC.png", width = 6.8, height = 5, units = "in")
 
 ```
 
@@ -627,30 +1160,30 @@ ggsave("RPB_se_numICC.png", width = 6.8, height = 5, units = "in")
 ```{r}
 
 
-perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) + 
-  geom_hline(yintercept = .05, linetype = "dashed")  + 
-  geom_hline(yintercept = -.05, linetype = "dashed")  + 
-  geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo ~ icc_est_n#, 
-             #labeller = label_bquote(rows = rho ==.(var_combo), 
-            #                                cols = k ==.(icc_est_n))
-             ) + 
-  labs(x = NULL, y = "RSEB", fill = NULL) + 
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-        axis.text.x = element_text(size = 6.5),
-        axis.text.y = element_text(size = 6.5),
-
-        plot.caption=element_text(hjust = 0, size = 6),
-       # legend.title=element_text(size = 6), 
-        legend.text=element_text(size = 6.5),
-        axis.title.x = element_text(size=6.5),
-        axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
-        strip.text.x = element_text(size = 6.5, face="bold"),
-        strip.text.y = element_text(size = 6.5, face="bold")
-      )
+# perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) + 
+#   geom_hline(yintercept = .05, linetype = "dashed")  + 
+#   geom_hline(yintercept = -.05, linetype = "dashed")  + 
+#   geom_boxplot(alpha = .5) + 
+#   facet_grid( var_combo_graph_f ~ icc_est_n, 
+#              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
+#                                             cols = k ==.(icc_est_n))
+#              ) + 
+#   labs(x = NULL, y = "RSEB", fill = NULL) + 
+#   theme_bw() +
+#   theme(
+#     legend.position = "bottom",
+#         axis.text.x = element_text(size = 6.5),
+#         axis.text.y = element_text(size = 6.5),
+# 
+#         plot.caption=element_text(hjust = 0, size = 6),
+#        # legend.title=element_text(size = 6), 
+#         legend.text=element_text(size = 6.5),
+#         axis.title.x = element_text(size=6.5),
+#         axis.title.y = element_text(size=6.5),
+#       #  strip.background =element_rect(fill="white")
+#         strip.text.x = element_text(size = 6.5, face="bold"),
+#         strip.text.y = element_text(size = 6.5, face="bold")
+#       )
 
 #ggsave("RPB_se_numICC.png", width = 6.8, height = 5, units = "in")
 
@@ -658,9 +1191,7 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
 
 
 
-
-
-```{r}
+```{r, eval = FALSE, include=FALSE }
 perf_crit$tau2 <- as.factor(perf_crit$tau)
 
 perf_crit  |> 
@@ -671,25 +1202,23 @@ perf_crit  |>
   geom_jitter(aes(color = model, shape = tau2, fill = NA),
               position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.8, seed = 345435), 
               size = .5, alpha = 0.6) +
- facet_grid( var_combo_graph ~ icc_est_n, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+ facet_grid(var_combo_graph_f ~ icc_est_n, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = k ==.(icc_est_n))) + 
   labs(x = NULL, y = "RSEB", fill = NULL) +
-  scale_color_manual(values = c("#FF6347", "steelblue")) + # Custom colors for points
-  scale_fill_manual(values = c("pink", "lightblue")) + # Custom colors for boxplots 
+  scale_color_manual(values = c("#FF6347", "steelblue")) +
+  scale_fill_manual(values = c("pink", "lightblue")) + 
    scale_shape_manual(values = c(1, 3, 2)) +
   theme_bw() +
-  theme(
-    legend.position = "bottom",
+  theme(legend.position = "bottom",
         axis.text.x = element_text(size = 6.5),
         axis.text.y = element_text(size = 6.5),
-
         plot.caption=element_text(hjust = 0, size = 6),
        # legend.title=element_text(size = 6), 
         legend.text=element_text(size = 6.5),
         axis.title.x = element_text(size=6.5),
         axis.title.y = element_text(size=6.5),
-      #  strip.background =element_rect(fill="white")
+       # strip.background =element_rect(fill="white")
         strip.text.x = element_text(size = 6.5, face="bold"),
         strip.text.y = element_text(size = 6.5, face="bold")
       ) 
@@ -711,8 +1240,8 @@ perf_crit |>
              size = 1)   + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  +
-  facet_grid( var_combo_graph ~ icc_est_n, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid( var_combo_graph_f ~ icc_est_n, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = k ==.(icc_est_n))) + 
   labs(
     x = NULL, 
@@ -728,7 +1257,7 @@ perf_crit |>
   )
 
 
-#ggsave("RPB_se_numICC_alt2.png", width = 6.8, height = 5, units = "in")
+ggsave("RSEB_numICC_alt2.png", width = 6.8, height = 5, units = "in")
 
 ```
 
@@ -740,18 +1269,14 @@ perf_crit |>
 
 
 
-
-
-
-
 perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ tau, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid( var_combo_graph_f ~ tau, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = tau==.(tau))) + 
-  labs(x = NULL, y = "RPB", fill = NULL) + 
+  labs(x = NULL, y = "RSEB", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
@@ -768,7 +1293,7 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RPB_se_tau.png", width = 6.8, height = 5, units = "in")
+ggsave("RSEB_tau.png", width = 6.8, height = 5, units = "in")
 
 
 
@@ -785,10 +1310,10 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ nj_size, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid( var_combo_graph_f ~ nj_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = j== .(nj_size))) + 
-  labs(x = NULL, y = "RPB", fill = NULL) + 
+  labs(x = NULL, y = "RSEB", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
@@ -814,6 +1339,8 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
 
 ### True ICC vs cluster size
 
+TASHA -- interestingly for SE of the pooled estimate, despite the bias in the pooled estimate. 
+
 ```{r}
 
 
@@ -826,10 +1353,10 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ n_bar_size, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid( var_combo_graph_f ~ n_bar_size, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = bar(n_j)==.(n_bar_size))) + 
-  labs(x = NULL, y = "RPB", fill = NULL) + 
+  labs(x = NULL, y = "RSEB", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
@@ -846,7 +1373,7 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RPB_se_nj.png", width = 6.8, height = 5, units = "in")
+ggsave("RSEB_nj.png", width = 6.8, height = 5, units = "in")
 
 
 
@@ -865,10 +1392,10 @@ perf_crit  |>
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
-  facet_grid( var_combo_graph ~ n_bar_prop, 
-             labeller = label_bquote(rows = rho ==.(var_combo_graph), 
+  facet_grid( var_combo_graph_f ~ n_bar_prop, 
+             labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
                                             cols = zeta ==.(n_bar_prop))) + 
-  labs(x = NULL, y = "RPB", fill = NULL) + 
+  labs(x = NULL, y = "RSEB", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
@@ -885,7 +1412,7 @@ perf_crit  |>
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RPB_n_bar_prop.png", width = 6.8, height = 5, units = "in")
+#ggsave("RSEB_n_bar_prop.png", width = 6.8, height = 5, units = "in")
 
 
 
@@ -911,7 +1438,7 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
   facet_grid( nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size), 
                                             cols = bar(n_j)==.(n_bar_size))) + 
-  labs(x = NULL, y = "RPB", fill = NULL) + 
+  labs(x = NULL, y = "RSEB", fill = NULL) + 
   theme_bw() +
   theme(
     legend.position = "bottom",
@@ -928,7 +1455,7 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
         strip.text.y = element_text(size = 6.5, face="bold")
       )
 
-#ggsave("RPB_se_j_nj.png", width = 6.8, height = 5, units = "in")
+#ggsave("RSEB_j_nj.png", width = 6.8, height = 5, units = "in")
 
 
 
@@ -942,50 +1469,7 @@ perf_crit  |> ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
 
 # L2 Variance
 
-```{r}
 
-
-
-perf_crit2$var_combo_graph <- factor(perf_crit2$var_combo,labels=c(
-  'small_large'=0.05,
-  'medium_large'=0.15,
-  'large_large'=0.25)) 
-
-
-
-perf_crit2 <- perf_crit2 |> mutate(
-  nj_size = case_when(
-    nj_size == "small" ~'U[30, 50]',
-
-    nj_size == "large" ~'U[50, 100]',
-  ))
-  
-
-
-perf_crit2 <- perf_crit2 |> mutate(
-  n_bar_size = case_when(
-    n_bar_size == "small" ~'U[10, 30]',
-
-    n_bar_size == "large" ~'U[30, 50]',
-  ))
-  
-
-
-perf_crit2 <- perf_crit2 |> mutate(
-                                 
-                                  
-                                  icc_est_n_graph = paste("k = ", icc_est_n)
-                              
-                                  )
-
-perf_crit2$icc_est_n_graph <- factor(perf_crit2$icc_est_n_graph,levels=c(
-  "20",
-  "50",
-  "100"))
-
-
-
-```
 
 ## Main Effects
 
@@ -995,14 +1479,33 @@ perf_crit2$icc_est_n_graph <- factor(perf_crit2$icc_est_n_graph,levels=c(
 
 
 
-perf_crit2  |> ggplot(aes(x = var_combo_graph, y = rel_bias_clus)) + 
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_clus)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
   geom_boxplot(alpha = .5) + 
- # facet_grid( rows = vars(var_combo_graph)
+ # facet_grid( rows = vars(var_combo_graph_f)
               #labeller = label_parsed
 #              ) + 
   labs(x = "ICC Parameter", y = "RPB") + 
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 6, face="bold"),
+        plot.caption=element_text(hjust = 0, size = 8),
+        legend.title=element_text(size = 8), 
+        legend.text=element_text(size = 8),
+        axis.title.x = element_text(size=8),
+        axis.title.y = element_text(size=8),
+        strip.background =element_rect(fill="white"))
+
+
+
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_clus_ratio)) + 
+  geom_hline(yintercept = 1, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+ # facet_grid( rows = vars(var_combo_graph_f)
+              #labeller = label_parsed
+#              ) + 
+  labs(x = "ICC Parameter", y = "RPB Ratio") + 
   theme_bw() +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 6, face="bold"),
@@ -1024,10 +1527,9 @@ perf_crit2  |> ggplot(aes(x = var_combo_graph, y = rel_bias_clus)) +
 
 
 
-perf_crit2  |> ggplot(aes(x = var_combo_graph, y = rel_bias_clus)) + 
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_clus)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
-#  geom_hline(yintercept = 0, linetype = "solid", colour = "red")  + 
   geom_boxplot(alpha = .5) + 
   facet_grid(cols = vars(tau )
              , 
@@ -1050,19 +1552,38 @@ ggsave("RPB_L2_tau_mean.png", width = 6.8, height = 5, units = "in")
 
 
 
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_clus_ratio)) + 
+  geom_hline(yintercept = 1, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(cols = vars(tau )
+             , 
+             labeller = label_bquote(cols = tau ==.(tau))) + 
+  labs(x = "ICC Parameter", y = "RPB Ratio") + 
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+      #  plot.caption=element_text(hjust = 0, size = 8),
+      #  legend.title=element_text(size = 8), 
+      #  legend.text=element_text(size = 8),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
 
 
 
 ```
 
 
-### L2 variance by clustersize
+### L2 variance by number of clusters
 
 ```{r}
 
 
 
-perf_crit2  |> ggplot(aes(x = var_combo_graph, y = rel_bias_clus)) + 
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_clus)) + 
   geom_hline(yintercept = .05, linetype = "dashed")  + 
   geom_hline(yintercept = -.05, linetype = "dashed")  + 
 #  geom_hline(yintercept = 0, linetype = "solid", colour = "red")  + 
@@ -1086,4 +1607,856 @@ perf_crit2  |> ggplot(aes(x = var_combo_graph, y = rel_bias_clus)) +
 
 ggsave("RPB_L2_j_mean.png", width = 6.8, height = 5, units = "in")
 
+
+
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_clus_ratio)) + 
+  geom_hline(yintercept = 1, linetype = "solid")  + 
+ 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(cols = vars(nj_size )
+             , 
+             labeller = label_bquote(cols = j ==.(nj_size))) + 
+  labs(x = "ICC Parameter", y = "RPB Ratio") + 
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+      #  plot.caption=element_text(hjust = 0, size = 8),
+      #  legend.title=element_text(size = 8), 
+      #  legend.text=element_text(size = 8),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+```
+
+
+
+### L1 variance by clustersize
+
+```{r}
+
+
+
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_res)) + 
+  geom_hline(yintercept = .05, linetype = "dashed")  + 
+  geom_hline(yintercept = -.05, linetype = "dashed")  + 
+#  geom_hline(yintercept = 0, linetype = "solid", colour = "red")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(cols = vars(n_bar_size )
+             , 
+             labeller = label_bquote(cols = nj ==.(n_bar_size))) + 
+  labs(x = "ICC Parameter", y = "RPB") + 
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+      #  plot.caption=element_text(hjust = 0, size = 8),
+      #  legend.title=element_text(size = 8), 
+      #  legend.text=element_text(size = 8),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+ggsave("RPB_L2_nj_mean.png", width = 6.8, height = 5, units = "in")
+
+
+
+perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_res_ratio)) + 
+   geom_hline(yintercept = 1, linetype = "solid")  + 
+  geom_boxplot(alpha = .5) + 
+  facet_grid(cols = vars(n_bar_size )
+             , 
+             labeller = label_bquote(cols = nj ==.(n_bar_size))) + 
+  labs(x = "ICC Parameter", y = "RPB Ratio") + 
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 6.5),
+        axis.text.y = element_text(size = 6.5),
+      #  plot.caption=element_text(hjust = 0, size = 8),
+      #  legend.title=element_text(size = 8), 
+      #  legend.text=element_text(size = 8),
+        axis.title.x = element_text(size=6.5),
+        axis.title.y = element_text(size=6.5),
+       strip.text.x = element_text(size = 6.5, face="bold"),
+        strip.text.y = element_text(size = 6.5, face="bold")
+      )
+
+```
+
+
+
+
+# Evaluating the Distribution ICC estimates
+
+Note for the Fisher TF pooled estimates, they have already been back transformed for all of these analyses. 
+
+
+```{r}
+load("data/results_conv.RData")
+load("data/results_pooled_est.RData")
+```
+
+# Distributions of the ICC Estimates from primary studies
+
+```{r}
+
+
+skewness <- function(x) {
+  
+  variance = var(x)
+  K = length(x)
+  skewness = (1/(K*sqrt(variance)^3)*sum((x-mean(x))^3))
+  
+  return(skewness)
+  
+}
+
+kurtosis <- function(x) {
+  
+  variance = var(x)
+  K = length(x)
+  kurtosis = (1/(K*variance^2))*sum((x-mean(x))^4)
+  
+  return(kurtosis)
+  
+}
+
+      
+```
+
+
+First, which set of conditions resulted in the lowest raw bias and relative bias? 
+
+For $\rho = 0.5$, it is when $k = 50$, $n_j \sim U[30, 50]$, $\overline{n_j} \sim U[10, 30]$, $n_{prop} = 0.1$, and $\tau = 0.2$. I will use that set for the distributions. 
+
+```{r}
+# perf_crit |>  group_by(ICC_true) |>  slice(which.min(bias_icc)) |> select(ICC_true, method, var_icc_name, icc_est_n, nj_size, n_bar_size, n_bar_prop, tau)
+# 
+# perf_crit |>  group_by(ICC_true) |>  slice(which.min(rel_bias_icc)) |> select(ICC_true, method, var_icc_name, icc_est_n, nj_size, n_bar_size, n_bar_prop, tau)
+
+
+results_all_converged_dist_icc_est <- results_all_converged |> filter(icc_est_n == 50) |>  filter(nj_size == "U[30, 50]") |>  filter(n_bar_size == "U[10, 30]") |>  filter(n_bar_prop == 0.1) |>  filter(tau == 0.02) 
+
+
+# results_all_converged_dist_icc_est <- results_all_converged |> filter(nj_size == "U[30, 50]") |> filter(n_bar_size == "U[10, 30]") |> 
+#   filter(n_bar_prop == 0.1) |> filter(tau == 0.02	) |> filter(icc_est_n == 50) 
+
+```
+
+## Distribution of ICC estimates when $\rho = 0.05$: 
+
+```{r}
+
+
+dist_0.05 <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.05) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.05  <- data.frame(icc = dist_0.05)
+
+ggplot(dist_0.05 , aes(x = icc)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  geom_vline(xintercept = 0.05, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.05$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.05$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .05 and cluster size 'U[10, 30]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+```
+
+This distribution has a mean of `r mean(dist_0.05$icc)`, variance of `r var(dist_0.05$icc)`, median of `r median(dist_0.05$icc)`, a skewness of `r skewness(dist_0.05$icc)`, and kurtosis of `r kurtosis(dist_0.05$icc)`. 
+
+```{r, eval = FALSE, include = FALSE}
+
+test <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.05) |> select(n_weighted) |> distinct()
+
+dist_0.05 <- cbind(dist_0.05, test$n_weighted)
+
+dist_0.05$icc_tf <- .5 * log((1 + (dist_0.05$`test$n_weighted` - 1) * dist_0.05$icc) / (1 - dist_0.05$icc))
+
+ggplot(dist_0.05 , aes(x = icc_tf)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  labs(title = "Histogram of ICC Values for rho = .05 and cluster size 'U[10, 30]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+
+```
+
+
+
+## Distribution of ICC estimates when $\rho = 0.10$: 
+
+```{r}
+
+
+dist_0.10 <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.10) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.10  <- data.frame(icc = dist_0.10)
+
+ggplot(dist_0.10 , aes(x = icc)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+      geom_vline(xintercept = 0.1, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.10$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.10$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .10 and cluster size 'U[10, 30]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+```
+
+
+This distribution has a mean of `r mean(dist_0.10$icc)`, variance of `r var(dist_0.10$icc)`, median of `r median(dist_0.10$icc)`, a skewness of `r skewness(dist_0.10$icc)`, and kurtosis of `r kurtosis(dist_0.10$icc)`.
+
+
+## Distribution of ICC estimates when $\rho = 0.15$: 
+
+```{r}
+
+
+dist_0.15 <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.15) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.15  <- data.frame(icc = dist_0.15)
+
+ggplot(dist_0.15 , aes(x = icc)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+      geom_vline(xintercept = 0.15, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.15$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.15$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .15 and cluster size 'U[10, 30]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+```
+
+
+This distribution has a mean of `r mean(dist_0.15$icc)`, variance of `r var(dist_0.15$icc)`, median of `r median(dist_0.15$icc)`, a skewness of `r skewness(dist_0.15$icc)`, and kurtosis of `r kurtosis(dist_0.15$icc)`.
+
+## Distribution of ICC estimates when $\rho = 0.25$: 
+
+```{r}
+
+
+dist_0.25 <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.25) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.25  <- data.frame(icc = dist_0.25 )
+
+ggplot(dist_0.25 , aes(x = icc)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  geom_vline(xintercept = 0.25, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.25$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.25$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .25 and cluster size 'U[10, 30]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+```
+
+
+This distribution has a mean of `r mean(dist_0.25$icc)`, variance of `r var(dist_0.25$icc)`, median of `r median(dist_0.25$icc)`, a skewness of `r skewness(dist_0.25$icc)`, and kurtosis of `r kurtosis(dist_0.25$icc)`.
+
+
+## Distribution of ICC estimates when $\rho = 0.50$: 
+
+
+```{r}
+
+
+
+dist_0.5 <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.5) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.5  <- data.frame(icc = dist_0.5 )
+
+ggplot(dist_0.5 , aes(x = icc)) +
+ geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  geom_vline(xintercept = 0.50, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.5$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.5$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .50 and cluster size 'U[10, 30]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+```
+
+
+This distribution has a mean of `r mean(dist_0.5$icc)`, variance of `r var(dist_0.5$icc)`, median of `r median(dist_0.5$icc)`, a skewness of `r skewness(dist_0.5$icc)`, and kurtosis of `r kurtosis(dist_0.5$icc)`.
+
+
+compare this to a distribution that has the larger average cluster sizes condition:
+
+
+```{r}
+results_all_converged_dist_icc_est2 <- results_all_converged |> filter(nj_size == "U[30, 50]") |> filter(n_bar_size == "U[30, 50]") |> 
+  filter(n_bar_prop == 0.1) |> filter(tau == 0.02	) |> filter(icc_est_n == 50) 
+
+dist_0.5 <- results_all_converged_dist_icc_est2 |> ungroup() |>  filter(var_combo_graph == 0.50) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.5  <- data.frame(icc = dist_0.5)
+
+ggplot(dist_0.5 , aes(x = icc)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  geom_vline(xintercept = 0.50, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.5$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.5$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .50 and cluster size 'U[30, 50]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+```
+
+
+This distribution has a mean of `r mean(dist_0.5$icc)`, variance of `r var(dist_0.5$icc)`, median of `r median(dist_0.5$icc)`, a skewness of `r skewness(dist_0.5$icc)`, and kurtosis of `r kurtosis(dist_0.5$icc)`.
+
+
+## Distribution of ICC estimates when $\rho = 0.90$: 
+
+
+```{r}
+
+
+dist_0.9 <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.9) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.9  <- data.frame(icc = dist_0.9)
+
+ggplot(dist_0.9 , aes(x = icc)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  geom_vline(xintercept = 0.9, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.9$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.9$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .9 and cluster size 'U[10, 30]'", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+```
+
+
+This distribution has a mean of `r mean(dist_0.9$icc)`, variance of `r var(dist_0.9$icc)`, median of `r median(dist_0.9$icc)`, a skewness of `r skewness(dist_0.9$icc)`, and kurtosis of `r kurtosis(dist_0.9$icc)`.
+
+
+```{r}
+
+
+dist_0.9 <- results_all_converged_dist_icc_est2 |> ungroup() |>  filter(var_combo_graph == 0.9) |> select(clustervar, residvar) |> distinct()  |>
+  mutate(icc_list = map2(clustervar, residvar, ~ map2(.x, .y, ~ .x / (.x + .y)))) |>  select(icc_list) |> unnest(icc_list) |>  unlist() 
+
+dist_0.9  <- data.frame(icc = dist_0.9)
+
+ggplot(dist_0.9 , aes(x = icc)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  geom_vline(xintercept = 0.9, linetype = "solid") + 
+  geom_vline(xintercept = mean(dist_0.9$icc), linetype = "dashed") + 
+  geom_vline(xintercept = median(dist_0.9$icc), linetype = "dotted") + 
+  labs(title = "Histogram of ICC Values for rho = .9 and cluster size 'U[30, 50]'" , x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+
+```
+
+
+
+```{r, eval = FALSE, include=FALSE}
+
+test <- results_all_converged_dist_icc_est |> ungroup() |>  filter(var_combo_graph == 0.90) |> select(n_weighted) |> distinct()
+
+dist_0.9 <- cbind(dist_0.9, test$n_weighted)
+
+dist_0.9$icc_tf <- .5 * log((1 + (dist_0.9$`test$n_weighted` - 1) * dist_0.9$icc) / (1 - dist_0.9$icc))
+
+ggplot(dist_0.9 , aes(x = icc_tf)) +
+  geom_histogram(fill = "#92D895", color = "#e9ecef", alpha = 0.6, binwidth = 0.01) +
+  labs(title = "Histogram of ICC Values for rho = .05", x = "ICC Estimate", y = "Frequency") +
+  theme_minimal()
+
+
+```
+
+
+# Distributions of the Pooled ICC estimates
+
+## $\rho = 0.05$:
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.05) |> 
+  group_by(variance, model) |> 
+  summarise(K = n(),
+            "Mean Pooled Estimate" = mean(pooled_icc_est),
+            var_est = var(pooled_icc_est),
+            "Raw Bias Pooled Estimate" = mean(pooled_icc_est) - 0.05,
+            "MCSE Raw Bias" = sqrt(var_est / K),
+            RMSE = sqrt(sum((pooled_icc_est - 0.05)^2) / K),
+            min_est = min(pooled_icc_est), 
+            max_est = max(pooled_icc_est),
+            .groups = "drop")|>
+  kbl() |>
+  kable_styling() |> 
+  scroll_box(width = "900px", height = "500px")
+  
+```
+
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.05) |> 
+#  group_by(var_combo_graph) |> 
+  ggplot(aes(x = pooled_icc_est)) +
+  geom_histogram( fill = "#404080", color = "#e9ecef", alpha = 0.6, position = 'identity', bins = 50) +
+    facet_grid(model ~ variance ) 
+```
+
+
+
+## $\rho = 0.10$:
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.10) |> 
+  group_by(variance, model) |> 
+  summarise(K = n(),
+            "Mean Pooled Estimate" = mean(pooled_icc_est),
+            var_est = var(pooled_icc_est),
+            "Raw Bias Pooled Estimate" = mean(pooled_icc_est) - 0.10,
+            "MCSE Raw Bias" = sqrt(var_est / K),
+            RMSE = sqrt(sum((pooled_icc_est - 0.10)^2) / K),
+            min_est = min(pooled_icc_est), 
+            max_est = max(pooled_icc_est), 
+            .groups = "drop")|> 
+  kbl() |>
+  kable_styling() |> 
+  scroll_box(width = "900px", height = "500px")
+```
+
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.1) |> 
+#  group_by(var_combo_graph) |> 
+  ggplot(aes(x = pooled_icc_est)) +
+  geom_histogram( fill = "#404080", color = "#e9ecef", alpha = 0.6, position = 'identity', bins = 50) +
+    facet_grid(model ~ variance )
+```
+
+##  $\rho = 0.15$:
+
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.15) |> 
+  group_by(variance, model) |> 
+  summarise(K = n(),
+            "Mean Pooled Estimate" = mean(pooled_icc_est),
+            var_est = var(pooled_icc_est),
+            "Raw Bias Pooled Estimate" = mean(pooled_icc_est) - 0.15,
+            "MCSE Raw Bias" = sqrt(var_est / K),
+            RMSE = sqrt(sum((pooled_icc_est - 0.15)^2) / K),
+            min_est = min(pooled_icc_est), 
+            max_est = max(pooled_icc_est),
+            .groups = "drop")|> 
+  kbl() |>
+  kable_styling() |> 
+  scroll_box(width = "900px", height = "500px")
+```
+
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.15) |> 
+#  group_by(var_combo_graph) |> 
+  ggplot(aes(x = pooled_icc_est)) +
+  geom_histogram( fill = "#404080", color = "#e9ecef", alpha = 0.6, position = 'identity', bins = 50) +
+    facet_grid(model~ variance )
+```
+
+##  $\rho = 0.25$:
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.25) |> 
+  group_by(variance, model) |> 
+  summarise(K = n(),
+            "Mean Pooled Estimate" = mean(pooled_icc_est),
+            var_est = var(pooled_icc_est),
+            "Raw Bias Pooled Estimate" = mean(pooled_icc_est) - 0.25,
+            "MCSE Raw Bias" = sqrt(var_est / K),
+            RMSE = sqrt(sum((pooled_icc_est - 0.25)^2) / K),
+            min_est = min(pooled_icc_est), 
+            max_est = max(pooled_icc_est),
+            .groups = "drop")|>
+
+  kbl() |>
+  kable_styling() |> 
+  scroll_box(width = "900px", height = "500px")
+```
+
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.25) |> 
+#  group_by(var_combo_graph) |> 
+  ggplot(aes(x = pooled_icc_est)) +
+  geom_histogram( fill = "#404080", color = "#e9ecef", alpha = 0.6, position = 'identity', bins = 50) +
+    facet_grid(model~ variance )
+
+```
+
+##  $\rho = 0.50$:
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.50) |> 
+  group_by(variance, model) |> 
+  summarise(K = n(),
+            "Mean Pooled Estimate" = mean(pooled_icc_est),
+      #      "Median Pooled Estimate" = median(pooled_icc_est),
+            var_est = var(pooled_icc_est),
+            "Raw Bias Pooled Estimate" = mean(pooled_icc_est) - 0.50,
+            "MCSE Raw Bias" = sqrt(var_est / K),
+            RMSE = sqrt(sum((pooled_icc_est - 0.50)^2) / K), 
+            min_est = min(pooled_icc_est), 
+            max_est = max(pooled_icc_est),
+            .groups = "drop")|>
+  kbl() |>
+  kable_styling() |> 
+  scroll_box(width = "900px", height = "500px")
+```
+
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.5) |> 
+#  group_by(var_combo_graph) |> 
+  ggplot(aes(x = pooled_icc_est)) +
+  geom_histogram( fill = "#404080", color = "#e9ecef", alpha = 0.6, position = 'identity', bins = 50) +
+    facet_grid(model ~ variance )
+```
+
+## $\rho = 0.90$:
+
+
+```{r}
+results_all_converged |> filter(var_combo_graph == 0.90) |> 
+  group_by(variance, model) |> 
+  summarise(K = n(),
+            "Mean Pooled Estimate" = mean(pooled_icc_est),
+      #      "Median Pooled Estimate" = median(pooled_icc_est),
+            var_est = var(pooled_icc_est),
+            "Raw Bias Pooled Estimate" = mean(pooled_icc_est) - 0.90,
+            "MCSE Raw Bias" = sqrt(var_est / K),
+            RMSE = sqrt(sum((pooled_icc_est - 0.90)^2) / K), 
+            min_est = min(pooled_icc_est), 
+            max_est = max(pooled_icc_est),
+            .groups = "drop")|>
+  kbl() |>
+  kable_styling() |> 
+  scroll_box(width = "900px", height = "500px")
+```
+
+```{r}
+
+results_all_converged |> filter(var_combo_graph == 0.9) |> 
+#  group_by(var_combo_graph) |> 
+  ggplot(aes(x = pooled_icc_est)) +
+  geom_histogram( fill = "#404080", color = "#e9ecef", alpha = 0.6, position = 'identity', bins = 50) +
+    facet_grid(model ~ variance )
+
+
+```
+
+## Skewness and Kurtosis 
+
+
+```{r}
+perf_crit |> 
+  group_by(variance, model, var_combo_graph) |> 
+  summarise(m_s = mean(skewness),
+          #  min_s = min(skewness),
+          #  max_s = max(skewness),
+            m_k = mean(kurtosis),
+          #  min_k = min(kurtosis),
+          #  max_k = max(kurtosis)
+          .groups = "drop")|>
+  pivot_wider(names_from = variance, values_from = c(m_s, m_k)) |>
+  kable(booktabs = TRUE, col.names = c("Model",
+                    "ICC Value",
+                    "Donner",
+                    "Fisher",
+                    "Fisher TF",
+                    "Hedges",
+                    "Smith",
+                    "Swiger",
+                    "Donner",
+                    "Fisher",
+                    "Fisher TF",
+                    "Hedges",
+                    "Smith",
+                    "Swiger"
+                    )) |>
+  kable_styling() |> 
+  add_header_above(c(" " = 2, "Mean Skewness" = 6, "Mean Kurtosis" = 6)) |> 
+  column_spec(9:14, bold = T, background = "grey") 
+# %>%
+#   row_spec(3:5, bold = T, color = "white", background = "#D7261E")
+
+
+perf_crit |> 
+  filter(var_combo_graph == 0.05) |>
+  group_by(model, variance) |> 
+  summarise(
+            m_b = mean(bias_icc),
+            m_rb = mean(rel_bias_icc),
+            m_s = mean(skewness),
+          #  min_s = min(skewness),
+          #  max_s = max(skewness),
+            m_k = mean(kurtosis),
+          #  min_k = min(kurtosis),
+          #  max_k = max(kurtosis)
+          .groups = "drop")|>
+  kable(booktabs = TRUE, col.names = c("Model",
+                    "ICC Value", "Mean Bias", "Mean Relative Bias", "Mean Skewness", "Mean Kurtosis")) |>
+  kable_styling() |> 
+  add_header_above(c(" " = 2, "ICC = 0.05" = 4))
+
+
+
+perf_crit |> 
+  filter(var_combo_graph == 0.1) |>
+  group_by(model, variance) |> 
+  summarise(
+            m_b = mean(bias_icc),
+            m_rb = mean(rel_bias_icc),
+            m_s = mean(skewness),
+          #  min_s = min(skewness),
+          #  max_s = max(skewness),
+            m_k = mean(kurtosis),
+          #  min_k = min(kurtosis),
+          #  max_k = max(kurtosis)
+          .groups = "drop")|>
+  kable(booktabs = TRUE, col.names = c("Model",
+                    "ICC Value", "Mean Bias", "Mean Relative Bias", "Mean Skewness", "Mean Kurtosis")) |>
+  kable_styling() |> 
+  add_header_above(c(" " = 2, "ICC = 0.10" = 4))
+
+perf_crit |> 
+  filter(var_combo_graph == 0.15) |>
+  group_by(model, variance) |> 
+  summarise(
+            m_b = mean(bias_icc),
+            m_rb = mean(rel_bias_icc),
+            m_s = mean(skewness),
+          #  min_s = min(skewness),
+          #  max_s = max(skewness),
+            m_k = mean(kurtosis),
+          #  min_k = min(kurtosis),
+          #  max_k = max(kurtosis)
+          .groups = "drop")|>
+  kable(booktabs = TRUE, col.names = c("Model",
+                    "ICC Value", "Mean Bias", "Mean Relative Bias", "Mean Skewness", "Mean Kurtosis")) |>
+  kable_styling() |> 
+  add_header_above(c(" " = 2, "ICC = 0.15" = 4))
+
+
+perf_crit |> 
+  filter(var_combo_graph == 0.25) |>
+  group_by(model, variance) |> 
+  summarise(
+            m_b = mean(bias_icc),
+            m_rb = mean(rel_bias_icc),
+            m_s = mean(skewness),
+          #  min_s = min(skewness),
+          #  max_s = max(skewness),
+            m_k = mean(kurtosis),
+          #  min_k = min(kurtosis),
+          #  max_k = max(kurtosis)
+          .groups = "drop")|>
+  kable(booktabs = TRUE, col.names = c("Model",
+                    "ICC Value", "Mean Bias", "Mean Relative Bias", "Mean Skewness", "Mean Kurtosis")) |>
+  kable_styling() |> 
+  add_header_above(c(" " = 2, "ICC = 0.25" = 4))
+
+
+perf_crit |> 
+  filter(var_combo_graph == 0.5) |>
+  group_by(model, variance) |> 
+  summarise(
+            m_b = mean(bias_icc),
+            m_rb = mean(rel_bias_icc),
+            m_s = mean(skewness),
+          #  min_s = min(skewness),
+          #  max_s = max(skewness),
+            m_k = mean(kurtosis),
+          #  min_k = min(kurtosis),
+          #  max_k = max(kurtosis)
+          .groups = "drop")|>
+  kable(booktabs = TRUE, col.names = c("Model",
+                    "ICC Value", "Mean Bias", "Mean Relative Bias", "Mean Skewness", "Mean Kurtosis")) |>
+  kable_styling() |> 
+  add_header_above(c(" " = 2, "ICC = 0.50" = 4))
+
+
+perf_crit |> 
+  filter(var_combo_graph == 0.9) |>
+  group_by(model, variance) |> 
+  summarise(
+            m_b = mean(bias_icc),
+            m_rb = mean(rel_bias_icc),
+            m_s = mean(skewness),
+          #  min_s = min(skewness),
+          #  max_s = max(skewness),
+            m_k = mean(kurtosis),
+          #  min_k = min(kurtosis),
+          #  max_k = max(kurtosis)
+          .groups = "drop")|>
+  kable(booktabs = TRUE, col.names = c("Model",
+                    "ICC Value", "Mean Bias", "Mean Relative Bias", "Mean Skewness", "Mean Kurtosis")) |>
+  kable_styling() |> 
+  add_header_above(c(" " = 2, "ICC = 0.90" = 4))
+
+
+
+  
+  
+
+```
+
+
+```{r}
+perf_crit_agg <- perf_crit |> 
+  group_by(model, variance, icc_est_n , var_combo_graph, tau) |> 
+  summarise(skewness_mean = mean(skewness), 
+            kurtosis_mean = mean(kurtosis),
+            n = n(),
+            .groups = "drop")
+
+
+
+ID1 <- c(0.05, 0.10, 0.15)
+
+perf_crit_agg |> filter(var_combo_graph < 0.2) |> ggplot(aes( var_combo_graph, skewness_mean, col=variance, shape = model ) ) + 
+  facet_grid(tau ~ icc_est_n, 
+             labeller = label_bquote(rows = tau == .(tau), 
+                                            cols = k ==.(icc_est_n))) +
+
+  geom_point( alpha=0.75 ) + 
+  geom_line( alpha=0.75 ) +
+  geom_hline( yintercept = 0 ) + 
+  scale_x_continuous("ICC Parameter", labels = as.character(ID1), breaks = ID1) +
+  theme_minimal()
+
+
+ID2 <- c(0.25, 0.5, 0.9)
+
+perf_crit_agg |> filter(var_combo_graph > 0.2) |> ggplot(aes( var_combo_graph, skewness_mean, col=variance, shape = model ) ) + 
+  facet_grid(tau ~ icc_est_n, 
+             labeller = label_bquote(rows = tau == .(tau), 
+                                            cols = k ==.(icc_est_n))) +
+
+  geom_point( alpha=0.75 ) + 
+  geom_line( alpha=0.75 ) +
+  geom_hline( yintercept = 0 ) + 
+  scale_x_continuous("ICC Parameter", labels = as.character(ID2), breaks = ID2) +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+ID1 <- c(0.05, 0.10, 0.15)
+
+perf_crit_agg |> filter(var_combo_graph < 0.2) |> ggplot(aes( var_combo_graph, kurtosis_mean, col=variance, shape = model ) ) + 
+  facet_grid(tau ~ icc_est_n, 
+             labeller = label_bquote(rows = tau == .(tau), 
+                                            cols = k ==.(icc_est_n))) +
+
+  geom_point( alpha=0.75 ) + 
+  geom_line( alpha=0.75 ) +
+  geom_hline( yintercept = 3 ) + 
+  scale_x_continuous("ICC Parameter", labels = as.character(ID1), breaks = ID1) +
+  theme_minimal()
+
+
+ID2 <- c(0.25, 0.5, 0.9)
+
+perf_crit_agg |> filter(var_combo_graph > 0.2) |> ggplot(aes( var_combo_graph, kurtosis_mean, col=variance, shape = model ) ) + 
+  facet_grid(tau ~ icc_est_n, 
+             labeller = label_bquote(rows = tau == .(tau), 
+                                            cols = k ==.(icc_est_n))) +
+
+  geom_point( alpha=0.75 ) + 
+  geom_line( alpha=0.75 ) +
+  geom_hline( yintercept = 3 ) + 
+  scale_x_continuous("ICC Parameter", labels = as.character(ID2), breaks = ID2) +
+  theme_minimal()
+```
+
+Other Graphs
+
+```{r}
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = skewness, color = factor(icc_est_n))) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) + 
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  facet_grid(variance ~ model, 
+             labeller = label_bquote(rows = .(variance), 
+                                            cols = .(model))) +
+  labs(x = "ICC Value", y = "Skewness", color = "k") 
+
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = skewness, color = factor(tau))) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) +
+    geom_hline(yintercept = 0, linetype = "solid")  + 
+  facet_grid(variance ~ icc_est_n, 
+             labeller = label_bquote(rows = .(variance), 
+                                            cols = k ==.(icc_est_n))) +
+  labs(x = "ICC Value", y = "Skewness", color = "tau") 
+
+
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = skewness, color = nj_graph)) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) +
+    geom_hline(yintercept = 0, linetype = "solid")  + 
+  facet_grid(variance ~ icc_est_n, 
+             labeller = label_bquote(rows = .(variance), 
+                                            cols = k ==.(icc_est_n))) +
+  labs(x = "ICC Value", y = "Skewness", color = "") 
+
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = skewness, color = n_bar_graph)) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) +
+  geom_hline(yintercept = 0, linetype = "solid")  + 
+  facet_grid(variance ~ icc_est_n, 
+             labeller = label_bquote(rows = .(variance), 
+                                            cols = k ==.(icc_est_n))) +
+  labs(x = "ICC Value", y = "Skewness", color = "") 
+  
+
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = kurtosis, color = factor(icc_est_n))) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) +
+  geom_hline(yintercept = 3, linetype = "solid")  + 
+  facet_grid(variance ~ model) + 
+  labs(x = "ICC Value", y = "Kurtosis", color = "k") 
+
+
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = kurtosis, color = factor(tau))) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) +
+    geom_hline(yintercept = 3, linetype = "solid")  + 
+  facet_grid(variance ~ icc_est_n, 
+             labeller = label_bquote(rows = .(variance), 
+                                            cols = k ==.(icc_est_n))) +
+  labs(x = "ICC Value", y = "Kurtosis", color = "tau") 
+
+
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = kurtosis, color = nj_graph)) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) +
+    geom_hline(yintercept = 3, linetype = "solid")  + 
+  facet_grid(variance ~ icc_est_n, 
+             labeller = label_bquote(rows = .(variance), 
+                                            cols = k ==.(icc_est_n))) +
+  labs(x = "ICC Value", y = "Kurtosis", color = "") 
+
+perf_crit |> 
+  ggplot(aes(x = factor(var_combo_graph), y = kurtosis, color = n_bar_graph)) +
+  geom_point(alpha = .5, position = position_jitter(width = .3)) +
+  geom_hline(yintercept = 3, linetype = "solid")  + 
+  facet_grid(variance ~ icc_est_n, 
+             labeller = label_bquote(rows = .(variance), 
+                                            cols = k ==.(icc_est_n))) +
+  labs(x = "ICC Value", y = "Kurtosis", color = "") 
+  
 ```
