@@ -283,10 +283,6 @@ rma_estimation <- function(icc_est_sample, icc_value, var_icc_est, var_icc_name 
 analysis <- function(icc_est_sample){
   
   
- # possibly_rve <- possibly(.f = rve_estimation, otherwise = NULL)
-  
- # possibly_reml <- possibly(.f = rma_estimation, otherwise = NULL)
-  
   analysis_results <-   dplyr::bind_rows( 
     rve_estimation(icc_est_sample = icc_est_sample, icc_value = icc_est, var_icc_est = var_hedges, var_icc_name = "Hedges"),
     rve_estimation(icc_est_sample = icc_est_sample, icc_value = icc_est, var_icc_est = var_donner, var_icc_name = "Donner"),
@@ -313,6 +309,8 @@ analysis <- function(icc_est_sample){
 
 library(patchwork) 
 
+  # get the data for both graphs
+
   nested_districts_eng <- all |> 
     mutate(erawsc = as.numeric(erawsc)) |> 
     group_by(district, grade) |> 
@@ -325,7 +323,7 @@ library(patchwork)
     unnest(icc_dat) |>
     mutate(study_id = district) |> # call district "study_id" to use the analysis() function
     nest(data = -grade) |>
-    mutate(grade= paste("g_", grade, sep = ""),
+    mutate(grade = paste("g_", grade, sep = ""),
            data = set_names(data, grade)) |>     
     dplyr::mutate(pooled = purrr::map(data, analysis))
   
@@ -342,13 +340,13 @@ library(patchwork)
     unnest(icc_dat) |>
     mutate(study_id = district) |> # call district "study_id" to use the analysis() function
     nest(data = -grade) |>
-    mutate(grade= paste("g_", grade, sep = ""),
+    mutate(grade = paste("g_", grade, sep = ""),
            data = set_names(data, grade)) |>     
     dplyr::mutate(pooled = purrr::map(data, analysis))
   
   
   
-
+  # graphs of the 2-level (students within schools) ICC estimates 
   
   eng_dis <- nested_districts_eng |>
     select(-pooled) |>
@@ -391,6 +389,8 @@ library(patchwork)
               n_icc = n(), .groups = 'drop')
   
   
+ # add in arithmetic mean ICC  
+  
  means_eng <- nested_districts_eng |>
     select(-pooled) |>
     unnest(data) |>
@@ -409,16 +409,13 @@ library(patchwork)
    summarise(mean_icc = mean(icc_est),
              .groups = 'drop')
   
-  
-  #nested_districts$pooled[[1]] |> select(method, pooled_icc_est, se_pooled_icc_est, var_icc_name)
+  # labels for graphs
 
-  #dummy single dataset without intercept grade for each dummy coded. 
-  
   grade.labs <- c("Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8")
   names(grade.labs) <- c("g_03", "g_04", "g_05", "g_06", "g_07", "g_08")
   
   
-
+  # graphs of the pooled ICC estimates for each subject
   
   mean_eng_graph <- nested_districts_eng |>
     select(-data) |>
