@@ -10,8 +10,6 @@
 #
 # By Bethany Hamilton Bhat
 #-------------------------------------------------------------------------------
-
-
 # library(nlme)
 # library(lmeInfo)
 # library(purrr)
@@ -20,11 +18,11 @@
 
 # Generates raw data from unconditional model
 
-gen_uncond_data <- function(nj, 
-                            l1_var, 
-                            l2_var, 
-                            n_bar = NULL, 
-                            n_bar_prop = NULL, 
+gen_uncond_data <- function(nj,
+                            l1_var,
+                            l2_var,
+                            n_bar = NULL,
+                            n_bar_prop = NULL,
                             tau) {
   
   # ICC parameter
@@ -58,9 +56,9 @@ gen_uncond_data <- function(nj,
   # cluster and individual ID values
   uncond_data <- data.frame(cluster = rep(seq(1, nj), times = num_ind))
   
-  # Obtaining individual and cluster residuals
-  uncond_data <- uncond_data |> 
-    group_by(cluster) |> 
+  # obtaining individual and cluster residuals
+  uncond_data <- uncond_data |>
+    group_by(cluster) |>
     mutate(individual = row_number(),
            cluster_resid = rnorm(1, 0, sqrt(l2_var_new)),
            ind_resid = rnorm(length(individual), 0, sqrt(l1_var)),
@@ -74,7 +72,7 @@ gen_uncond_data <- function(nj,
 }
 
 
-# Estimate ICC
+# estimate ICC
 
 est_icc <- function(uncond_data) {
   
@@ -102,7 +100,7 @@ est_icc <- function(uncond_data) {
   if(converged == "yes"){
     
   # obtaining variances
-  info <- extract_varcomp(model)
+  info <- lmeInfo::extract_varcomp(model)
   clustervar <- as.numeric(info$Tau$cluster) # cluster variance
   residvar <- as.numeric(info$sigma_sq) # residual variance
   
@@ -118,9 +116,9 @@ est_icc <- function(uncond_data) {
   var_hedges <- as.numeric(((1 - icc_est)^2 * v2) / (clustervar + residvar)^2)
   
   # mean sample size
-  n <- as.numeric(uncond_data |> 
-                  group_by(cluster) |> 
-                  summarise(ni = length(individual), .groups = 'drop') |> 
+  n <- as.numeric(uncond_data |>
+                  group_by(cluster) |>
+                  summarise(ni = length(individual), .groups = 'drop') |>
                   summarise(mean = mean(ni), .groups = 'drop')
   )
   
@@ -131,15 +129,15 @@ est_icc <- function(uncond_data) {
   var_fisher <- (2 * (1 - icc_est)^2 * (1 + (n - 1) * icc_est)^2) / (n * (n - 1) * (m - 1))
   
   # list of sample sizes 
-  list <- model$groups |> 
-          group_by(cluster) |> 
-          tally() |> 
+  list <- model$groups |>
+          group_by(cluster) |>
+          tally() |>
           select(n)
   
   W <- 1 + (list$n - 1) * icc_est
   V <- 1 + (list$n - 1) * icc_est^2
   
-  # Total Sample Size
+  # total Sample Size
   N <- model$dims$N 
   
   # Donner
@@ -155,7 +153,7 @@ est_icc <- function(uncond_data) {
   var_swiger <- (2 * (N - 1) * (1 - icc_est)^2 * (1 + (n_0 - 1) * icc_est)^2)/(n_0^2 * (N - m) * (m - 1))
   
   
-  ## Smith
+  # Smith
   pt1 <- (2 * ((1 - icc_est)^2)/(n_0^2))
   pt2a <- (((1 + (icc_est * (n_0 - 1)))^2)/(N - m))
   pt2b <- (m - 1) * (1 - icc_est) * (1 + (icc_est * (2 * n_0 - 1)))
@@ -164,7 +162,7 @@ est_icc <- function(uncond_data) {
   var_smith <- pt1 * ((pt2a + ((pt2b + pt2c) / pt2d)))
   
   
-  ## Fisher transformed 
+  # Fisher transformed 
   icc_est_fisher_tf <- .5 * log((1 + (n_0 - 1) * icc_est) / (1 - icc_est))
   var_fisher_tf <- .5 * (((m - 1)^(-1)) + ((N - m)^(-1)))
   
@@ -221,11 +219,11 @@ est_icc <- function(uncond_data) {
 # balanced designs. I do not use this function, but I am leaving it here in case
 # I decide I want to take a look at this later. 
 
-gen_icc <- function(icc_est_n, 
-                    nj, 
-                    n_bar, 
-                    n_bar_prop, 
-                    var_combo, 
+gen_icc <- function(icc_est_n,
+                    nj,
+                    n_bar,
+                    n_bar_prop,
+                    var_combo,
                     tau) {
   
   # different conditions for level 1 and level 2 variances
@@ -247,19 +245,19 @@ gen_icc <- function(icc_est_n,
   }
 
   icc_est <- replicate(icc_est_n, {
-                          dat <- gen_uncond_data(nj = nj, 
-                                                 n_bar = n_bar, 
-                                                 n_bar_prop = n_bar_prop, 
-                                                 l1_var = l1_var, 
-                                                 l2_var = l2_var, 
+                          dat <- gen_uncond_data(nj = nj,
+                                                 n_bar = n_bar,
+                                                 n_bar_prop = n_bar_prop,
+                                                 l1_var = l1_var,
+                                                 l2_var = l2_var,
                                                  tau = tau)
     
 
                          cbind(est_icc(uncond_data = dat), nj, n_bar, tau)
-                         }, simplify = FALSE) |> 
+                         }, simplify = FALSE) |>
              dplyr::bind_rows() |>
-             mutate(study_id = row_number(), 
-                    l1_var = l1_var, 
+             mutate(study_id = row_number(),
+                    l1_var = l1_var,
                     l2_var = l2_var)
 
   return(icc_est)
@@ -271,12 +269,11 @@ gen_icc <- function(icc_est_n,
 
 # Generates data sets repeatedly and estimated ICC for each data set for 
 # unbalanced designs. 
-
-gen_icc_unbalanced <- function(icc_est_n, 
-                               nj_size, 
-                               n_bar_size, 
-                               n_bar_prop, 
-                               var_combo, 
+gen_icc_unbalanced <- function(icc_est_n,
+                               nj_size,
+                               n_bar_size,
+                               n_bar_prop,
+                               var_combo,
                                tau) {
   
   if(nj_size == "small"){
@@ -347,23 +344,23 @@ gen_icc_unbalanced <- function(icc_est_n,
     
   }
   
-  icc_est <- replicate(icc_est_n, { 
+  icc_est <- replicate(icc_est_n, {
     
                          nj <- sample(n_min:n_max, 1, replace=TRUE)
                          n_bar <- sample(n_bar_min:n_bar_max, 1, replace=TRUE)
 
-                         dat <- gen_uncond_data(nj = nj, 
-                                                n_bar = n_bar, 
-                                                n_bar_prop = n_bar_prop, 
-                                                l1_var = l1_var, 
-                                                l2_var = l2_var, 
+                         dat <- gen_uncond_data(nj = nj,
+                                                n_bar = n_bar,
+                                                n_bar_prop = n_bar_prop,
+                                                l1_var = l1_var,
+                                                l2_var = l2_var,
                                                 tau = tau)
                          
                          cbind(est_icc(uncond_data = dat), nj, n_bar, tau)
-                         }, simplify = FALSE) |> 
-             bind_rows() |>  
-             mutate(study_id = row_number(), 
-                        l1_var = l1_var, 
+                         }, simplify = FALSE) |>
+             bind_rows() |>
+             mutate(study_id = row_number(),
+                        l1_var = l1_var,
                         l2_var = l2_var)
   
   return(icc_est)
