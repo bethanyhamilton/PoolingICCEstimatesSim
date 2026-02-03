@@ -1,15 +1,15 @@
 #-------------------------------------------------------------------------------
-# Estimation Functions for Pooling ICC Estimates
+# Estimation Functions
 #-------------------------------------------------------------------------------
- # library(metafor)
- # library(clubSandwich)
- # library(robumeta)
- # library(dplyr)
- # library(nlme)
- # library(lmeInfo)
- # library(purrr)
- # library(tidyr)
- # source("sim/1_gen_sample_ICC.R")
+# library(metafor)
+# library(clubSandwich)
+# library(robumeta)
+# library(dplyr)
+# library(nlme)
+# library(lmeInfo)
+# library(purrr)
+# library(tidyr)
+# source("sim/1_gen_sample_ICC.R")
 
 
 
