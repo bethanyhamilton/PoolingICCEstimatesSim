@@ -306,7 +306,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ tau,
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
-                                            cols = tau==.(tau))) +
+                                            cols = tau[rho]==.(tau))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -335,7 +335,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ tau,
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
-                                            cols = tau==.(tau))) +
+                                            cols = tau[rho]==.(tau))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -366,7 +366,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ tau,
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
-                                            cols = tau==.(tau))) +
+                                            cols = tau[rho]==.(tau))) +
   labs(x = NULL, y = "RMSE", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -486,7 +486,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ n_bar_size, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -518,7 +518,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ n_bar_size, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -549,7 +549,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ n_bar_size, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RMSE", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -669,7 +669,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size), 
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -693,7 +693,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size), 
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -716,7 +716,7 @@ perf_crit |>ggplot(aes(x = variance, y = RMSE, fill = model)) +
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RMSE", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -747,7 +747,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ n_bar_size, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -771,7 +771,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ n_bar_size, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -794,7 +794,7 @@ perf_crit |>ggplot(aes(x = variance, y = RMSE, fill = nj_size)) +
   geom_boxplot(alpha = .5) +
   facet_grid(var_combo_graph_f ~ n_bar_size, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)),
-                                     cols = bar(n_j)==.(n_bar_size))) +
+                                     cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RMSE", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -825,7 +825,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(
@@ -850,7 +850,7 @@ perf_crit |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -880,7 +880,7 @@ perf_crit |>filter(var_combo_graph == 0.50) |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size),
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(
@@ -904,7 +904,7 @@ perf_crit |>filter(var_combo_graph == 0.50) |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size),
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -927,7 +927,7 @@ perf_crit |>filter(var_combo_graph == 0.50) |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop),
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -950,7 +950,7 @@ perf_crit |>filter(var_combo_graph == 0.50) |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -979,7 +979,7 @@ perf_crit |>filter(var_combo_graph == 0.90) |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size),
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(
@@ -1003,7 +1003,7 @@ perf_crit |>filter(var_combo_graph == 0.90) |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size),
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -1028,7 +1028,7 @@ perf_crit |>filter(var_combo_graph == 0.90) |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -1051,7 +1051,7 @@ perf_crit |>filter(var_combo_graph == 0.90) |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -1080,7 +1080,7 @@ perf_crit |>filter(var_combo_graph == 0.05) |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size),
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(
@@ -1104,7 +1104,7 @@ perf_crit |>filter(var_combo_graph == 0.05) |>
   geom_boxplot(alpha = .5) +
   facet_grid(nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size),
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -1129,7 +1129,7 @@ perf_crit |>filter(var_combo_graph == 0.05) |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RPB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -1152,7 +1152,7 @@ perf_crit |>filter(var_combo_graph == 0.05) |>
   geom_boxplot(alpha = .5) +
   facet_grid(n_bar_prop ~ n_bar_size, 
              labeller = label_bquote(rows = zeta ==.(n_bar_prop), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "PB", fill = NULL) +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -1329,7 +1329,7 @@ perf_crit |>ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
   geom_boxplot(alpha = .5) +
   facet_grid( var_combo_graph_f ~ tau, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
-                                            cols = tau==.(tau))) +
+                                            cols = tau[rho]==.(tau))) +
   labs(x = NULL, y = "RSEB", fill = NULL) +
   theme_bw() +
   theme(
@@ -1409,7 +1409,7 @@ perf_crit |>ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
   geom_boxplot(alpha = .5) +
   facet_grid( var_combo_graph_f ~ n_bar_size, 
              labeller = label_bquote(rows = rho ==.(as.character(var_combo_graph_f)), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RSEB", fill = NULL) +
   theme_bw() +
   theme(
@@ -1491,7 +1491,7 @@ perf_crit |>ggplot(aes(x = variance, y = rel_bias_se_ICC, fill = model)) +
   geom_boxplot(alpha = .5) +
   facet_grid( nj_size ~ n_bar_size, 
              labeller = label_bquote(rows = j ==.(nj_size), 
-                                            cols = bar(n_j)==.(n_bar_size))) +
+                                            cols = bar(n)[j]==.(n_bar_size))) +
   labs(x = NULL, y = "RSEB", fill = NULL) +
   theme_bw() +
   theme(
@@ -1586,9 +1586,9 @@ perf_crit2  |> ggplot(aes(x = factor(var_combo_graph), y = rel_bias_clus)) +
   geom_hline(yintercept = .05, linetype = "dashed") +
   geom_hline(yintercept = -.05, linetype = "dashed") +
   geom_boxplot(alpha = .5) +
-  facet_grid(cols = vars(tau )
+  facet_grid(cols = vars(tau)
              , 
-             labeller = label_bquote(cols = tau ==.(tau))) +
+             labeller = label_bquote(cols = tau[rho] ==.(tau))) +
   labs(x = "ICC Parameter", y = "RPB") +
   theme_bw() +
   theme(legend.position = "none",
